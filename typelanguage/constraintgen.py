@@ -39,19 +39,21 @@ class ConstrainedEnv(object):
                      constraints = '\n\t'.join([str(c) for c in self.constraints]),
                      result      = self.return_type))
     
-def constraints(env, pyast):
+def constraints(pyast, env=None):
+    env = env or {}
+    
     if isinstance(pyast, ast.Module) or isinstance(pyast, ast.Interactive):
         env = copy.copy(env)
         constraints = []
         for stmt in pyast.body:
-            cs = constraints_stmt(env, stmt)
+            cs = constraints_stmt(stmt, env=env)
             env.update(cs.env)
             constraints += cs.constraints
 
         return ConstrainedEnv(env=env, constraints=constraints)
 
     elif isinstance(pyast, ast.Expression):
-        expr_ty = constraints_expr(pyast.body)
+        expr_ty = constraints_expr(pyast.body, env=env)
         return Constrained_env(env=env, constraints=expr_ty.constraints)
 
     else:
@@ -88,7 +90,9 @@ def union(left, right):
     else:
         return types.UnionType(right, left)
 
-def constraints_stmt(env, stmt):
+def constraints_stmt(stmt, env=None):
+    env = env or {}
+    
     if isinstance(stmt, ast.FunctionDef):
         arg_env = fn_env(stmt.args)
 
@@ -96,7 +100,7 @@ def constraints_stmt(env, stmt):
         constraints = []
         return_type = None # TODO: should be fresh and constrained?
         for body_stmt in stmt.body:
-            cs = constraints_stmt(body_env, body_stmt)
+            cs = constraints_stmt(body_stmt, env=body_env)
             body_env.update(cs.env)
             constraints += cs.constraints
             return_type = union(return_type, cs.return_type)
@@ -105,10 +109,14 @@ def constraints_stmt(env, stmt):
                                             return_type=return_type)
 
         return ConstrainedEnv(env=env, constraints=constraints)
+
+    elif isinstance(stmt, ast.Expr):
+        constrained_ty = constraints_expr(stmt.value, env=env)
+        return ConstrainedEnv(env=env, constraints=constrained_ty.constraints)
         
     elif isinstance(stmt, ast.Return):
         if stmt.value:
-            expr_result = constraints_expr(env, stmt.value)
+            expr_result = constraints_expr(stmt.value, env=env)
             return ConstrainedEnv(env=env, constraints=expr_result.constraints, return_type=expr_result.type)
         else:
             result = types.fresh()
@@ -117,7 +125,9 @@ def constraints_stmt(env, stmt):
     else:
         raise NotImplementedError('Constraint gen for stmt %s' % stmt)
     
-def constraints_expr(env, expr):
+def constraints_expr(expr, env=None):
+    env = env or {}
+    
     if isinstance(expr, ast.Name) and isinstance(expr.ctx, ast.Load):
         if expr.id in env:
             return ConstrainedType(type=env[expr.id])
@@ -126,10 +136,13 @@ def constraints_expr(env, expr):
 
     elif isinstance(expr, ast.Num):
         return ConstrainedType(type=types.AtomicType('num'))
+
+    elif isinstance(expr, ast.Str):
+        return ConstrainedType(type=types.AtomicType('str'))
         
     elif isinstance(expr, ast.BinOp):
-        left = constraints_expr(env, expr.left)
-        right = constraints_expr(env, expr.right)
+        left = constraints_expr(expr.left, env=env)
+        right = constraints_expr(expr.right, env=env)
         ty = types.fresh()
         
         if isinstance(expr.op, ast.Mult):

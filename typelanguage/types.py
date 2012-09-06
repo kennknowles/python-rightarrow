@@ -5,16 +5,26 @@ class AtomicType(Type, namedtuple('AtomicType', ['name'])): pass
 class TypeVariable(Type, namedtuple('TypeVariable', ['name'])): pass
 
 class FunctionType(Type):
-    def __init__(self, anon_types, return_type, args_type=None, kwargs_type=None):
-        self.anon_types = anon_types
+    def __init__(self, arg_types, return_type, vararg_type=None, kwonly_arg_types=None, kwarg_type=None):
+        self.arg_types = arg_types
         self.return_type = return_type
-        self.args_type = args_type
-        self.kwargs_type = kwargs_type
+        self.vararg_type = vararg_type
+        self.kwarg_type = kwarg_type
+        self.kwonly_arg_types = kwonly_arg_types
 
     def __str__(self):
-        return ('(%(anon_types)s) -> %(return_type)s' %
-                dict(anon_types=self.anon_types,
-                     return_type=self.return_type))
+        comma_separated_bits = [unicode(v) for v in self.arg_types]
+        
+        if self.vararg_type:
+            comma_separated_bits.append('*%s' % self.vararg_type)
+
+        if self.kwonly_arg_types:
+            comma_separated_bits += ['%s=%s' % (kwarg, ty) for (kwarg, ty) in self.kwonly_arg_types.items() ]
+
+        if self.kwarg_type:
+            comma_separated_bits.append('**%s' % self.kwarg_type)
+        
+        return '(%s) -> %s' % (', '.join(comma_separated_bits), self.return_type)
 
 class TypeApplication(Type):
     def __init__(self, fn, args):

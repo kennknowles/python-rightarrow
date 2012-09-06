@@ -45,15 +45,27 @@ def constraints(env, pyast):
     else:
         raise Exception('Unknown ast node: %s' % pyast)
 
-def extended_env(env, arguments):
+def extended_env(env, more_env):
     new_env = copy.copy(env)
-   
+    new_env.update(more_env)
+    return new_env
+
+# Note that this is rather different in Python 3 - and better!
+def fn_env(arguments):
+    new_env = {}
+
     for arg in arguments.args:
         if isinstance(arg, ast.Name) and isinstance(arg.ctx, ast.Param):
             new_env[arg.id] = types.fresh() # TODO: ??
         else:
             raise Exception('Arg is not a name in Param context!? %s' % arg) 
 
+    if arguments.vararg:
+        new_env[arguments.vararg] = types.fresh() # TODO: sub/superty of list
+
+    if arguments.kwarg:
+        new_env[arguments.kwarg] = types.fresh() # TODO: sub/superty of dict
+    
     return new_env
 
 def union(left, right):
@@ -66,16 +78,19 @@ def union(left, right):
 
 def constraints_stmt(env, stmt):
     if isinstance(stmt, ast.FunctionDef):
-        env = extended_env(env, stmt.args)
+        arg_env = fn_env(stmt.args)
+
+        body_env = extended_env(env, arg_env)
         constraints = []
-        return_type = None
+        return_type = None # TODO: should be fresh and constrained?
         for body_stmt in stmt.body:
-            cs = constraints_stmt(env, body_stmt)
-            env.update(cs.env)
+            cs = constraints_stmt(body_env, body_stmt)
+            body_env.update(cs.env)
             constraints += cs.constraints
             return_type = union(return_type, cs.return_type)
 
-        env[stmt.name] = types.FunctionType(anon_types=[], return_type=return_type)
+        env[stmt.name] = types.FunctionType(arg_types=[arg_env[arg.id] for arg in stmt.args.args],
+                                            return_type=return_type)
 
         return ConstrainedEnv(env=env, constraints=constraints)
         

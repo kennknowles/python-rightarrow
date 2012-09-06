@@ -10,6 +10,13 @@ class Constraint(object):
         self.subtype = subtype
         self.supertype = supertype
 
+    def __str__(self):
+        return '%s <: %s' % (self.subtype, self.supertype)
+
+    def substitute(self, substitution):
+        return Constraint(subtype = self.subtype.substitute(substitution),
+                          supertype = self.supertype.substitute(substitution))
+
 class ConstrainedType(object):
     def __init__(self, type=None, constraints=None):
         self.type = type
@@ -21,10 +28,15 @@ class ConstrainedEnv(object):
         self.constraints = constraints or []
         self.return_type = return_type
 
+    def substitute(self, substitution):
+        return ConstrainedEnv(env = dict([(key, ty.substitute(substitution)) for key, ty in self.env.items()]),
+                              constraints = [constraint.substitute(substitution) for constraint in self.constraints],
+                              return_type = None if self.return_type is None else self.return_type.substitute(substitution))
+
     def pretty(self):
         return ("Env:\n\t%(bindings)s\n\nConstraints:\n\t%(constraints)s\n\nResult:\n\t%(result)s" % 
                 dict(bindings    = '\n\t'.join(['%s: %s' % (var, ty) for var, ty in self.env.items()]),
-                     constraints = '\n\t'.join(['%s <: %s' % (c.subtype, c.supertype) for c in self.constraints]),
+                     constraints = '\n\t'.join([str(c) for c in self.constraints]),
                      result      = self.return_type))
     
 def constraints(env, pyast):
@@ -113,7 +125,7 @@ def constraints_expr(env, expr):
             raise Exception('Variable not found in environment: %s' % expr.id)
 
     elif isinstance(expr, ast.Num):
-        return ConstrainedType(type=types.AtomicType('int'))
+        return ConstrainedType(type=types.AtomicType('num'))
         
     elif isinstance(expr, ast.BinOp):
         left = constraints_expr(env, expr.left)

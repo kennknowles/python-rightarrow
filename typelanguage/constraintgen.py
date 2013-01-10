@@ -54,7 +54,7 @@ def constraints(pyast, env=None):
 
     elif isinstance(pyast, ast.Expression):
         expr_ty = constraints_expr(pyast.body, env=env)
-        return Constrained_env(env=env, constraints=expr_ty.constraints)
+        return ConstrainedEnv(env=env, constraints=expr_ty.constraints)
 
     else:
         raise Exception('Unknown ast node: %s' % pyast)
@@ -129,16 +129,29 @@ def constraints_expr(expr, env=None):
     env = env or {}
     
     if isinstance(expr, ast.Name) and isinstance(expr.ctx, ast.Load):
-        if expr.id in env:
+        if expr.id in ['False', 'True']: # Unlike other literals, these are actually just global identifiers
+            return ConstrainedType(type=types.AtomicType('bool'))
+        elif expr.id in env:
             return ConstrainedType(type=env[expr.id])
         else:
             raise Exception('Variable not found in environment: %s' % expr.id)
 
     elif isinstance(expr, ast.Num):
-        return ConstrainedType(type=types.AtomicType('num'))
+        # The python ast module already chose the type of the num
+        if isinstance(expr.n, int):
+            return ConstrainedType(type=types.AtomicType('int'))
+        elif isinstance(expr.n, long):
+            return ConstrainedType(type=types.AtomicType('long'))
+        elif isinstance(expr.n, float):
+            return ConstrainedType(type=types.AtomicType('float'))
+        elif isinstance(expr.n, complex):
+            return ConstrainedType(type=types.AtomicType('complex'))
 
     elif isinstance(expr, ast.Str):
         return ConstrainedType(type=types.AtomicType('str'))
+
+    elif isinstance(expr, ast.List):
+        return ConstrainedType(type=types.ListType(elem_ty=types.fresh()))
         
     elif isinstance(expr, ast.BinOp):
         left = constraints_expr(expr.left, env=env)
@@ -161,5 +174,7 @@ def constraints_expr(expr, env=None):
 if __name__ == '__main__':
     with open(sys.argv[1]) as fh:
         proggy = ast.parse(fh.read())
+
+    print ast.dump(proggy)
         
-    print constraints({}, proggy).pretty()
+    print constraints(proggy).pretty()

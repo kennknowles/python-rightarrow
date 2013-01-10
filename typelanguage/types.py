@@ -1,5 +1,23 @@
 from collections import namedtuple, defaultdict
-    
+
+# Kinds
+
+class Kind(object): pass
+
+# The kind of types
+class Type(Kind): pass
+
+# The kind of record field names
+class Label(Kind): pass
+
+class FunctionKind(Kind):
+    def __init__(self, dom, rng):
+        self.dom = dom
+        self.rng = rng
+
+        
+## Types proper
+
 class Type(object): pass
 
 class AtomicType(Type):
@@ -14,6 +32,20 @@ class AtomicType(Type):
 
     def __eq__(self, other):
         return isinstance(other, AtomicType) and other.name == self.name
+
+# TODO: Make into a higher-kinded type? Maybe that's just a headache?
+class ListType(Type):
+    def __init__(self, elem_ty):
+        self.elem_ty = elem_ty
+
+    def substitute(self, substitution):
+        return ListType(self.elem_ty.substitue(substitution))
+
+    def __str__(self):
+        return '[%s]' % self.elem_ty
+
+    def __eq__(self):
+        return isinstance(other, ListType) and other.elem_ty == self.elem_ty
         
 class TypeVariable(Type):
     def __init__(self, name):
@@ -68,6 +100,9 @@ class TypeApplication(Type):
 class UnionType(Type):
     def __init__(self, types):
         self.types = types
+
+
+# Fresh variable supply
 
 used_vars = defaultdict(lambda: 0)
 def fresh(prefix=None):

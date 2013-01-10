@@ -14,11 +14,12 @@ The Types
 
 This type language provides the following concepts:
 
- * Atomic types `int`, `long`, `float`, `complex`, `str`, `unicode`
- * Compound types for tuples, lists, dictionaries, written `(int, str)`,  `[int]`, {int: str}
+ * Atomic types, written just like Python's run-time tags: `int`, `long`, `float`, `complex`, `str`, `unicode`
+ * Compound types for tuples, lists, dictionaries, written with analogous syntax: `(int, str)`,  `[int]`, {int: str}
  * Object types `object(field1: int, field2: string) `
  * Function types like `int -> int`, `str` (they can get much more complex in Python, though - see below)
- * Polymorphic types like `forall a. [a] -> [a]`
+ * Polymorphic types like `~a -> ~a` (the identity function) or `[~a] -> [~a]` for map (really `(Iteratable ~a -> Iterable ~a)`)
+
 
 Function Types
 --------------
@@ -28,13 +29,38 @@ We try to re-use the function call / declaration syntax also in the types, so th
 
 (int, *[int], **{int: str}) -> str 
 
+
+Contract Certification / Verification
+-------------------------------------
+
+Types can be treated as executable contracts, which are like assertions except that the act
+of _certifying_ that some code meets a contract is separate from _verifying_ that fact.
+You can certify a value meets a contract via
+
+    `certify <type> <who> <value>`
+
+Where `who` is the one who will be blamed if this value turned out to disobey the contract.
+If you have a certified value on hand, then you know who certified it, so you can verify 
+that it meets the contract and otherwise blame them.
+
+    `verify <certified value>`
+
+And certify will work as a decorator
+
+```python
+@certify('int -> int', "Me")
+def f(x):
+   return x * 2
+```
+
+
 Type Inference
 --------------
 
 In the spirit of Python and dynamic languages, type inference is best-effort. Based
 on the program, this module can discover constraints between types present at different
-parts of the program. This constraint set may well be undecidable, especially if your
-program gets crazy. In most sane code, types will be almost entirely inferrable.
+parts of the program. The general problem is undecidable whether or not the code
+contains reflection.
 
 
 Further Reading:

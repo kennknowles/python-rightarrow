@@ -33,6 +33,7 @@ class AtomicType(Type):
     def __eq__(self, other):
         return isinstance(other, AtomicType) and other.name == self.name
 
+
 # TODO: Make into a higher-kinded type? Maybe that's just a headache?
 class ListType(Type):
     def __init__(self, elem_ty):
@@ -101,6 +102,8 @@ class UnionType(Type):
     def __init__(self, types):
         self.types = types
 
+    def __str__(self):
+        return '|'.join([str(ty) for ty in self.types])
 
 # Fresh variable supply
 
@@ -110,4 +113,17 @@ def fresh(prefix=None):
     prefix = prefix or 'X'
     used_vars[prefix] = used_vars[prefix] + 1
     return TypeVariable(prefix + str(used_vars[prefix]))
+
+# Shortcuts for common types
+
+bool_t = AtomicType('bool')
+int_t = AtomicType('int')
+long_t = AtomicType('long')
+float_t = AtomicType('float')
+complex_t = AtomicType('complex')
+
+str_t = AtomicType('str')
+unicode_t = AtomicType('unicode')
+
+numeric_t = UnionType([int_t, long_t, complex_t, float_t])
 

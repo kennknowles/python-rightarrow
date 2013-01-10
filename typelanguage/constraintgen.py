@@ -88,7 +88,7 @@ def union(left, right):
     elif right is None:
         return left
     else:
-        return types.UnionType(right, left)
+        return types.UnionType([right, left])
 
 def constraints_stmt(stmt, env=None):
     env = env or {}
@@ -130,7 +130,7 @@ def constraints_expr(expr, env=None):
     
     if isinstance(expr, ast.Name) and isinstance(expr.ctx, ast.Load):
         if expr.id in ['False', 'True']: # Unlike other literals, these are actually just global identifiers
-            return ConstrainedType(type=types.AtomicType('bool'))
+            return ConstrainedType(type=types.bool_t)
         elif expr.id in env:
             return ConstrainedType(type=env[expr.id])
         else:
@@ -139,16 +139,16 @@ def constraints_expr(expr, env=None):
     elif isinstance(expr, ast.Num):
         # The python ast module already chose the type of the num
         if isinstance(expr.n, int):
-            return ConstrainedType(type=types.AtomicType('int'))
+            return ConstrainedType(type=types.int_t)
         elif isinstance(expr.n, long):
-            return ConstrainedType(type=types.AtomicType('long'))
+            return ConstrainedType(type=types.long_t)
         elif isinstance(expr.n, float):
-            return ConstrainedType(type=types.AtomicType('float'))
+            return ConstrainedType(type=types.float_t)
         elif isinstance(expr.n, complex):
-            return ConstrainedType(type=types.AtomicType('complex'))
+            return ConstrainedType(type=types.complex_t)
 
     elif isinstance(expr, ast.Str):
-        return ConstrainedType(type=types.AtomicType('str'))
+        return ConstrainedType(type=types.str_t)
 
     elif isinstance(expr, ast.List):
         return ConstrainedType(type=types.ListType(elem_ty=types.fresh()))
@@ -159,10 +159,11 @@ def constraints_expr(expr, env=None):
         ty = types.fresh()
         
         if isinstance(expr.op, ast.Mult):
-            # Really, it is whatever the left-hand type returns from __mult__!
-            op_constraints = [Constraint(subtype=left.type, supertype=types.AtomicType('num')),
-                              Constraint(subtype=right.type, supertype=types.AtomicType('num')),
-                              Constraint(subtype=ty, supertype=types.AtomicType('num'))]
+            # TODO: consider whether all types should match (forces coercions to be explicit; a good thing)
+            # Note: though strings and bools can be used in mult, forget it!
+            op_constraints = [Constraint(subtype=left.type, supertype=types.numeric_t),
+                              Constraint(subtype=right.type, supertype=types.numeric_t),
+                              Constraint(subtype=ty, supertype=types.numeric_t)]
         else:
             raise NotImplementedError('BinOp') # TODO: just use function application constraint gen
 

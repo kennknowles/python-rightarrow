@@ -16,7 +16,14 @@ class Refutation(object):
         return False
 
     def __str__(self):
-        return 'Refutation(reason="%s")' % self.reason
+        return 'Refutation("%s")' % self.reason
+
+class Stumper(object):
+    def __init__(self, constraint):
+        self.constraint = constraint
+
+    def __str__(self):
+        return 'Stumper("%s")' % self.constraint
 
 def reconcile(constraint):
     '''
@@ -45,28 +52,44 @@ def reconcile(constraint):
             return {constraint.subtype.name: constraint.supertype}
         else:
             return Refutation('Cannot reconcile non-atomic type with atomic type: %s' % constraint)
-    else:
-        raise NotImplementedError('Reconciliation of %s' % constraint)
+
+    elif isinstance(constraint.supertype, UnionType):
+        # Lots of stuff could happen here; unsure if there's research to bring to bear
+        if constraint.subtype in constraint.supertype.types:
+            return {}
+
+    return Stumper(constraint)
 
 def solve(constraints):
     remaining_constraints = copy.copy(constraints)
     substitution = {}
+
+    # Constraints that we've passed up because we don't know what to do with it;
+    # if all constraints get moved into this list then give up.
+    # Whenever progress is made, put these back in before substituting
+    stumpers = [] 
     
     while len(remaining_constraints) > 0:
         constraint = remaining_constraints.pop()
+
         additional_substitution = reconcile(constraint)
 
         logger.info('reconcile(%s) ==> %s', constraint, additional_substitution)
-    
 
-        if isinstance(additional_substitution, Refutation):
+        if isinstance(additional_substitution, Stumper):
+            stumpers.append(additional_substitution.constraint)
+        elif isinstance(additional_substitution, Refutation):
             return additional_substitution
         else:
+            remaining_constraints += stumpers
+            stumpers = []
             substitution.update(additional_substitution)
+            remaining_constraints = [c.substitute(additional_substitution) for c in remaining_constraints]
 
-        remaining_constraints = [c.substitute(additional_substitution) for c in remaining_constraints]
-        
-    return substitution
+    if len(stumpers) > 0:
+        raise Exception('Got stumped by after figuring out %s, by %s' % (substitution, stumpers)) # TODO: smarter result
+    else:
+        return substitution
 
 if __name__ == '__main__':
     logging.basicConfig()
@@ -75,10 +98,10 @@ if __name__ == '__main__':
     with open(sys.argv[1]) as fh:
         proggy = ast.parse(fh.read())
 
-    cs = constraintgen.constraints({}, proggy)
+    cs = constraintgen.constraints(proggy)
     print cs.pretty()
 
     substitution = solve(cs.constraints)
-    print substitution
-
-    print cs.substitute(substitution).pretty()
+    if not isinstance(substitution, Refutation):
+        print substitution
+        print cs.substitute(substitution).pretty()

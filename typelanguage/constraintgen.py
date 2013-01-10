@@ -6,6 +6,8 @@ from collections import namedtuple
 from typelanguage import types
 
 class Constraint(object):
+    "A type constraint of the form `S <: T`"
+    
     def __init__(self, subtype, supertype):
         self.subtype = subtype
         self.supertype = supertype
@@ -18,11 +20,20 @@ class Constraint(object):
                           supertype = self.supertype.substitute(substitution))
 
 class ConstrainedType(object):
+    "A type along with a set of constraints, of the form `T & [S1 <: T1, ...]`"
+    
     def __init__(self, type=None, constraints=None):
         self.type = type
         self.constraints = constraints or []
 
 class ConstrainedEnv(object):
+    """
+    An environment mapping variables to types, along with some constraints, and a return type.
+    One way to write it might be like...
+    
+    T_return & { x: T_x, f: T_f, ... } & [S1 <: T1, ...]
+    """
+    
     def __init__(self, env=None, constraints=None, return_type=None):
         self.env = env or {}
         self.constraints = constraints or []
@@ -91,6 +102,12 @@ def union(left, right):
         return types.UnionType([right, left])
 
 def constraints_stmt(stmt, env=None):
+    """
+    Since a statement may define new names or return an expression ,
+    the constraints that result are in a
+    ConstrainedEnv mapping names to types, with constraints, and maybe 
+    having a return type (which is a constrained type)
+    """
     env = env or {}
     
     if isinstance(stmt, ast.FunctionDef):
@@ -121,6 +138,22 @@ def constraints_stmt(stmt, env=None):
         else:
             result = types.fresh()
             return ConstrainedEnv(env=env, constraints=[Constraint(subtype=result, supertype=types.AtomicType('NoneType'))])
+
+    elif isinstance(stmt, ast.Assign):
+        if len(stmt.targets) > 1:
+            raise NotImplementedError('Cannot generate constraints for multi-target assignments yet')
+
+        expr_result = constraints_expr(stmt.value, env=env)
+        target = stmt.targets[0].id
+        
+        # For an assignment, we actually generate a fresh variable so that it can be the union of all things assigned
+        # to it. We do not do any typestate funkiness.
+        if target not in env:
+            env[target] = types.fresh()
+            
+        return ConstrainedEnv(env=env, 
+                              constraints = expr_result.constraints + [Constraint(subtype=expr_result.type, 
+                                                                                  supertype=env[target])])
 
     else:
         raise NotImplementedError('Constraint gen for stmt %s' % stmt)

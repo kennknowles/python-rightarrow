@@ -3,66 +3,89 @@ A Type Language for Python
 
 https://github.com/kennknowles/python-typelanguage
 
-This module provides a type language for communicating about Python programs and values. 
-
+This package provides a type language for communicating about Python programs and values. 
 Humans communicating to other humans, humans communicating to the computer, and even the computer
 communicating to humans (via type inference and run-time contract checking).
 
-Project progress: Currently basic types can be parsed and basic Python code can have basic types
-inferred. Next steps are parsing "all" types so that test cases for enforcement and type
-inference are easy to construct.
+This project has a "duck-typed" status: Whatever you can use it for, it is ready for :-)
+
+Here is a more concrete list of implemented and intended features:
+
+ - _yes_      - Definition of a type language.
+ - _yes_      - Parsing and printing.
+ - _yes_      - Monitoring of type adherence for monomorphic types.
+ - _upcoming_ - Monitoring of type adherence for polymorphic types.
+ - _upcoming_ - Generation of constraints between types in a program.
+ - _upcoming_ - Best-effort inference of suitable types.
+ - _upcoming_ - `Any` type with gradual typing.
+ - _upcoming_ - Refinement types with hybrid type checking.
 
 
 The Types
 ---------
 
-This type language provides the following concepts:
+This type language is built from the following concepts:
 
- * Atomic types, written just like Python's run-time tags: `int`, `long`, `float`, `complex`, `str`, `unicode`
- * Compound types for tuples, lists, dictionaries, written with analogous syntax: `(int, str)`,  `[int]`, `{int: str}`
- * Function types like `int -> int`; see below for discussion of Pythonic complexities.
- 
-And these are obviously necessary and planned, but the concrete syntax and typing rules are not in place yet:
+ - Named types: `int`, `long`, `float`, `complex`, `str`, `unicode`, `file`, `YourClassNameHere`, ...
+ - List types: `[int]`, `[[long]]`, ...
+ - Tuple types: `(int, long)`, `(float, (int, Regex))`, ...
+ - Dictionary types: `{string: float}`, `{ (str, str) : [complex] }`, ...
+ * Union types `int|long|float`, `str|file`, ...
+ - Function types:
+    - `str -> int`
+    - `(int) -> int`
+    - `(int, int) -> int`
+    - `( (int, int) ) -> int`
+    - `( str|file ) -> SomeClass`
+    - `(int, *[str]) -> [(str, int)]`
+    - `(int, *[int], **{int: str}) -> str`
+ - Object types: `object(self_type, field1: int, field2: str, ...)`
+ - Polymorphic types (where `~a`, `~b`, ~c` range over any other type)
+    - `~a -> ~a`
+    - `[~a] -> [~a]`
+    - `( (~a, ~b) ) -> ~a`
+ - The "any" type, `??`, when a value is too complex to describe in this language. May be an indication that
+   a piece of code is metaprogramming or should be treated with gradual typing.
 
- * Object types `object(field1: int, field2: str) `
- * Polymorphic types like `~a -> ~a` (the identity function) or `[~a] -> [~a]` for map (really `(Iteratable ~a -> Iterable ~a)`)
- * "Any" type, written `any` or `??` perhaps. This is when a piece of code does a lot of reflection, and we want to communicate that it works for "anything".
-   This is also a key component of a _gradual typing_ system, which would be useful.
- * Union types like `str | int | any -> any` which add another layer of flexibility so we can communicate if a rather flexible function
-   still requires some particular restriction.
 
-Function Types
---------------
-
-The basic type of e.g. `str -> str` is pretty easy. But what about named args? `*args`? `**kwargs`?
-We try to re-use the function call / declaration syntax also in the types, so they can look like this:
-
- * `str -> int`
- * `(int) -> int`
- * `(int, int) -> int`
- * `(int, *[str]) -> [(str, int)]`
- * `(int, *[int], **{int: str}) -> str`
-
-I have not yet wrapped my head around what needs to happen for kwonly args. Also untouched
-is Python 3 where the AST for argument lists has changed.
-
+(TODO: Since tilde is special to pandoc markdown and other markdowns in other ways, choose a better
+way to write polymorphic types that also makes sense in Python)
 
 Types as Contracts
 ------------------
 
-TBD. It would be very easy to use these as composable assertions, as in
-lots of contract systems. Recent developments both in blame assignment
-and "gradual" typing make this a good fit.
+The module `typelanguage.enforce` contains functions for using these types as
+run-time monitors.
+
+Applied directly:
 
 ```python
-@enforce('int -> int')
-def f(x):
-   return x * 2
+>>> check('{string: int}', {"hello" : "there"})
 ```
 
-(it is actually more complicated, because you will want to know whether
-it is your code or the calling code that is responsible, but exactly
-how that works can vary)
+More interestingly, automatically protecting a function from bad input,
+for example, putting better error checking on Python's `unicode`/`str`
+interactions.
+
+```python
+>>> '\xa3'.encode('utf-8')
+...
+UnicodeDecodeError: 'ascii' codec can't decode byte 0xa3 in position 0: ordinal not in range(128)
+
+>>> @guard('unicode -> str')
+... def safe_encode(s):
+...    return s.encode('utf-8')
+
+>>> safe_encode(u'hello')
+'hello'
+>>> safe_encode('\xa3')
+TypeError: Type check failed: ? does not have type unicode
+```
+
+Eventually, the notion of _blame_ may be usefully incorporated, for pointing
+out which piece of code or agent in a distributed setting is responsible
+for the undesirable value.
+
 
 Type Inference
 --------------
@@ -76,10 +99,27 @@ In the spirit of Python and dynamic languages, type inference is best-effort. It
 3. Some of these constraints are not going to be practical to try to solve, so we
    can just drop them or insert some enforcement code if we like.
 
+
 Further Reading:
 ----------------
 
-There are many projects that check contracts or types for Python in some way or
+There's no way to give enough great links for reading about types,
+contracts, hybrid typing, gradual typing, type inference, etc, but
+here are some key starting points that inspire specific parts of
+this project.
+
+(TODO: find hrefs)
+
+ - The seminal work on dynamically-checked conttracts is Findler & Felleisen 2002. The
+   core ideas of _blame_ and wrapping functions were here.
+ - Flanagan combined that notion with types in Hybrid Type Checking 2006 (later expanded and corrected into Knowles-Flanagan 2010)
+ - The term _gradual typing_ was created by Siek and Taha to describe a particular type
+   of Hybrid Type Checking focused on the "Any" type.
+ - Knowles-Flanagan 2007 showed that type inference is decidable even if type checking isn't,
+   and it is that method of type reconstruction that inspires the constraint generation and 
+   solving here.
+
+There are many other projects that check contracts or types for Python in some way or
 another, but they all focus on checking, not communicating. As such, they miss what
 I like best about types.
 
@@ -88,6 +128,13 @@ I like best about types.
  * typechecker
  * contracts
  * pyDBC
+
+And since dynamic languages are much of a muchness, it is worthwhile seeing what is
+happening elsewhere:
+
+ * contracts.coffee
+ * Racket
+ * ...
 
 
 Contributors

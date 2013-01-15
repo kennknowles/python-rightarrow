@@ -1,5 +1,9 @@
 *.pyc
 *~
 
+# Emacs
+\#(
+.\#*
+
 /dist
 /*.egg-info

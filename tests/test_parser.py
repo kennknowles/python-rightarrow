@@ -36,6 +36,11 @@ class TestParser(unittest.TestCase):
 
             ('int|str', UnionType([int_t, str_t])),
             ('int|str|unicode', UnionType([UnionType([int_t, str_t]), unicode_t])),
+
+            ('~a', TypeVariable('a')),
+            ('~foo', TypeVariable('foo')),
+
+            ('~a -> ~a', FunctionType([TypeVariable('a')], TypeVariable('a'))),
         ]
 
         for string, parsed in test_cases:

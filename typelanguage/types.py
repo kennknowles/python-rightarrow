@@ -102,6 +102,9 @@ class TypeVariable(Type):
     def __str__(self):
         return '?%s' % self.name
 
+    def __eq__(self, other):
+        return isinstance(other, TypeVariable) and  other.name == self.name
+
 class FunctionType(Type):
     def __init__(self, arg_types, return_type, vararg_type=None, kwonly_arg_types=None, kwarg_type=None):
         self.arg_types = arg_types

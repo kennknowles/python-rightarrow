@@ -63,7 +63,7 @@ class TypeParser(object):
 
     def p_ty_var(self, p):
         "ty : TYVAR"
-        p[0] = p[1] # TODO: actually have a constructor for it
+        p[0] = TypeVariable(p[1])
 
     def p_ty_union(self, p):
         "ty : ty '|' ty"

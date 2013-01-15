@@ -4,6 +4,10 @@ import ast
 from typelanguage.enforce import check
 from typelanguage.types import *
 
+class Struct:
+    def __init__(self, **entries): 
+        self.__dict__.update(entries)
+
 class TestEnforce(unittest.TestCase):
 
     def test_check_immediate_passing(self):
@@ -17,6 +21,14 @@ class TestEnforce(unittest.TestCase):
             ('str|int', 3),
             ('str|int', "hello"),
             ('[str]|int', ["hello"]),
+
+            ('object()', Struct()),
+            ('object()', 3),
+            ('object()', [5]),
+            ('object()', "hello"),
+
+            ('object(foo:int)', Struct(foo=3)),
+            ('object(foo:[int|str])', Struct(foo=["hello", 3])),
         ]
 
         for ty, val in cases:
@@ -29,6 +41,7 @@ class TestEnforce(unittest.TestCase):
             ('[int]', ["hello"]),
             ('[str]', [[]]),
             ('[str]|int', [3]),
+            ('object(foo:[int|complex])', Struct(foo=["hello", 3])),
         ]
 
         for ty, val in cases:

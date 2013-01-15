@@ -180,6 +180,12 @@ class ObjectType(Type):
     def __eq__(self, other):
         return isinstance(other, ObjectType) and self.field_tys == other.field_tys
 
+    def enforce(self, val):
+        # Technically lets other properties slip in, but due to every object having a bunch of __foo__ props that can wait
+        for field, ty in self.field_tys.items():
+            ty.enforce(getattr(val, field))
+        return val
+
 # Fresh variable supply
 
 used_vars = defaultdict(lambda: 0)

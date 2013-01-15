@@ -8,6 +8,10 @@ This module provides a type language for communicating about Python programs and
 Humans communicating to other humans, humans communicating to the computer, and even the computer
 communicating to humans (via type inference and run-time contract checking).
 
+Project progress: Currently basic types can be parsed and basic Python code can have basic types
+inferred. Next steps are parsing "all" types so that test cases for enforcement and type
+inference are easy to construct.
+
 
 The Types
 ---------

@@ -15,11 +15,17 @@ The Types
 This type language provides the following concepts:
 
  * Atomic types, written just like Python's run-time tags: `int`, `long`, `float`, `complex`, `str`, `unicode`
- * Compound types for tuples, lists, dictionaries, written with analogous syntax: `(int, str)`,  `[int]`, {int: str}
- * Object types `object(field1: int, field2: string) `
+ * Compound types for tuples, lists, dictionaries, written with analogous syntax: `(int, str)`,  `[int]`, `{int: str}`
  * Function types like `int -> int`, `str` (they can get much more complex in Python, though - see below)
- * Polymorphic types like `~a -> ~a` (the identity function) or `[~a] -> [~a]` for map (really `(Iteratable ~a -> Iterable ~a)`)
+ 
+And these are obviously necessary and planned, but the concrete syntax and typing rules are not in place yet:
 
+ * Object types `object(field1: int, field2: str) `
+ * Polymorphic types like `~a -> ~a` (the identity function) or `[~a] -> [~a]` for map (really `(Iteratable ~a -> Iterable ~a)`)
+ * "Any" type, written `any` or `??` perhaps. This is when a piece of code does a lot of reflection, and we want to communicate that it works for "anything".
+   This is also a key component of a _gradual typing_ system, which would be useful.
+ * Union types like `str | int | any -> any` which add another layer of flexibility so we can communicate if a rather flexible function
+   still requires some particular restriction.
 
 Function Types
 --------------
@@ -27,41 +33,44 @@ Function Types
 The basic type of e.g. `str -> str` is pretty easy. But what about named args? `*args`? `**kwargs`?
 We try to re-use the function call / declaration syntax also in the types, so they can look like this:
 
-(int, *[int], **{int: str}) -> str 
+ * `str -> int`
+ * `(int) -> int`
+ * `(int, int) -> int`
+ * `(int, *[str]) -> [(str, int)]`
+ * `(int, *[int], **{int: str}) -> str`
+
+I have not yet wrapped my head around what needs to happen for kwonly args. Also untouched
+is Python 3 where the AST for argument lists has changed.
 
 
-Contract Certification / Verification
--------------------------------------
+Types as Contracts
+------------------
 
-Types can be treated as executable contracts, which are like assertions except that the act
-of _certifying_ that some code meets a contract is separate from _verifying_ that fact.
-You can certify a value meets a contract via
-
-    `certify <type> <who> <value>`
-
-Where `who` is the one who will be blamed if this value turned out to disobey the contract.
-If you have a certified value on hand, then you know who certified it, so you can verify 
-that it meets the contract and otherwise blame them.
-
-    `verify <certified value>`
-
-And certify will work as a decorator
+TBD. It would be very easy to use these as composable assertions, as in
+lots of contract systems. Recent developments both in blame assignment
+and "gradual" typing make this a good fit.
 
 ```python
-@certify('int -> int', "Me")
+@enforce('int -> int')
 def f(x):
    return x * 2
 ```
 
+(it is actually more complicated, because you will want to know whether
+it is your code or the calling code that is responsible, but exactly
+how that works can vary)
 
 Type Inference
 --------------
 
-In the spirit of Python and dynamic languages, type inference is best-effort. Based
-on the program, this module can discover constraints between types present at different
-parts of the program. The general problem is undecidable whether or not the code
-contains reflection.
+In the spirit of Python and dynamic languages, type inference is best-effort. It works like so:
 
+1. By traversing the code, we can discover a bunch of constraints between types in
+   different bits.
+2. Some of these constraints are going to be very easy to solve, so we can just
+   propagate the results.
+3. Some of these constraints are not going to be practical to try to solve, so we
+   can just drop them or insert some enforcement code if we like.
 
 Further Reading:
 ----------------

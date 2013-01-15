@@ -25,19 +25,23 @@ class TypeLexer(object):
         while True:
             t = new_lexer.token()
             if t is None: break
+            t.col = t.lexpos - new_lexer.latest_newline
             yield t
 
     # ============== PLY Lexer specification ==================
-    # This probably should be private but things like "literals"
-    # might be a legitimate part of the public interface. Anyhow
-    # it is pythonic to give some rope to hang oneself with :-)
+    #
+    # This probably should be private but:
+    #   - the parser requires access to `tokens` (perhaps they should be defined in a third, shared dependency)
+    #   - things like `literals` might be a legitimate part of the public interface.
+    #
+    # Anyhow, it is pythonic to give some rope to hang oneself with :-)
 
     literals = ['|', '(', ')', '{', '}', '[', ']', ':', '*', ',', ';']
     
-    tokens = ['ID', 'TYVAR', 'ARROW', 'KWARGS']
+    tokens = ['ID', 'TYVAR', 'ARROW', 'KWARG']
 
     t_ARROW = r'->'
-    t_KWARGS = r'\*\*'
+    t_KWARG = r'\*\*'
     t_ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
     t_ignore = ' \t'
 

@@ -40,13 +40,29 @@ class ListType(Type):
         self.elem_ty = elem_ty
 
     def substitute(self, substitution):
-        return ListType(self.elem_ty.substitue(substitution))
+        return ListType(self.elem_ty.substitute(substitution))
 
     def __str__(self):
         return '[%s]' % self.elem_ty
 
-    def __eq__(self):
+    def __eq__(self, other):
         return isinstance(other, ListType) and other.elem_ty == self.elem_ty
+
+class DictType(Type):
+    def __init__(self, key_ty, value_ty):
+        self.key_ty = key_ty
+        self.value_ty = value_ty
+
+    def substitute(self, substitution):
+        return DictType(key_ty=self.key_ty.substitute(substitution),
+                        value_ty=self.value_ty.substitute(substitution))
+
+
+    def __str__(self):
+        return '{%s:%s}' % (self.key_ty, self.value_ty)
+
+    def __eq__(self, other):
+        return isinstance(other, DictType) and other.key_ty == self,key_ty and other.value_ty == self.value_ty
         
 class TypeVariable(Type):
     def __init__(self, name):
@@ -65,8 +81,8 @@ class FunctionType(Type):
     def __init__(self, arg_types, return_type, vararg_type=None, kwonly_arg_types=None, kwarg_type=None):
         self.arg_types = arg_types
         self.return_type = return_type
-        self.vararg_type = vararg_type
-        self.kwarg_type = kwarg_type
+        self.vararg_type = vararg_type 
+        self.kwarg_type = kwarg_type 
         self.kwonly_arg_types = kwonly_arg_types
 
     def substitute(self, substitution):
@@ -87,8 +103,17 @@ class FunctionType(Type):
 
         if self.kwarg_type:
             comma_separated_bits.append('**%s' % self.kwarg_type)
+
+        if len(comma_separated_bits) == 1:
+            argument_list = comma_separated_bits[0]
+        else:
+            argument_list = '(%s)' % ','.join(comma_separated_bits)
         
-        return '(%s) -> %s' % (', '.join(comma_separated_bits), self.return_type)
+        return '%s -> %s' % (argument_list, self.return_type)
+
+    def __eq__(self, other):
+        return isinstance(other, FunctionType) and other.vararg_type == self.vararg_type and other.kwarg_type == self.kwarg_type \
+          and other.arg_types == self.arg_types and other.kwonly_arg_types == self.kwonly_arg_types
 
 class TypeApplication(Type):
     def __init__(self, fn, args):

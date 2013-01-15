@@ -36,5 +36,5 @@ class TestLexer(unittest.TestCase):
         self.assert_lex_equiv('[int]', [self.token('['), self.token('int', 'ID'), self.token(']')])
         self.assert_lex_equiv('int -> int', [self.token('int', 'ID'), self.token('->', 'ARROW'), self.token('int', 'ID')])
         self.assert_lex_equiv('*a', [self.token('*'), self.token('a', 'ID')])
-        self.assert_lex_equiv('**a', [self.token('**', 'KWARGS'), self.token('a', 'ID')])
-        self.assert_lex_equiv('*x, **a', [self.token('*'), self.token('x', 'ID'), self.token(','), self.token('**', 'KWARGS'), self.token('a', 'ID')])
+        self.assert_lex_equiv('**a', [self.token('**', 'KWARG'), self.token('a', 'ID')])
+        self.assert_lex_equiv('*x, **a', [self.token('*'), self.token('x', 'ID'), self.token(','), self.token('**', 'KWARG'), self.token('a', 'ID')])

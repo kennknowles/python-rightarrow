@@ -33,6 +33,17 @@ class AtomicType(Type):
     def __eq__(self, other):
         return isinstance(other, AtomicType) and other.name == self.name
 
+    def enforce(self, val):
+        # TODO: Is it worth the boilerplate to have IntType, etc, and all primitives inherit and override here?
+        # and yes, this does look a lot like how these types already work, but I want to leave the possibility
+        # of doing something better with blame... or something
+        if self.name in ['int', 'long', 'float', 'complex', 'str', 'unicode']:
+            if type(val).__name__ == self.name:
+                return val
+            else:
+                raise TypeError('Type check failed: %s does not have type %s' % (val, self))
+        else:
+            return False # TODO: when we actually have nominal (abstract) types, do some check here
 
 # TODO: Make into a higher-kinded type? Maybe that's just a headache?
 class ListType(Type):
@@ -47,6 +58,13 @@ class ListType(Type):
 
     def __eq__(self, other):
         return isinstance(other, ListType) and other.elem_ty == self.elem_ty
+
+    def enforce(self, val):
+        if type(val) != list:
+            raise TypeError('Type check failed: %s is not a list %s' % (val, self))
+        else:
+            return [self.elem_ty.enforce(x) for x in val] # This could be slooooow
+
 
 class DictType(Type):
     def __init__(self, key_ty, value_ty):
@@ -63,6 +81,13 @@ class DictType(Type):
 
     def __eq__(self, other):
         return isinstance(other, DictType) and other.key_ty == self,key_ty and other.value_ty == self.value_ty
+
+    def enforce(self, val):
+        if type(val) != dict:
+            raise TypeError('Type check failed: %s is not a list %s' % (val, self))
+        else:
+            return dict([(self.key_ty.enforce(key), self.value_ty.enforce(value)) for key, value in val.items()])
+            
         
 class TypeVariable(Type):
     def __init__(self, name):

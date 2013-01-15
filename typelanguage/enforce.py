@@ -1,4 +1,3 @@
-from decorator import decorator
 
 from typelanguage.parser import TypeParser
     
@@ -12,4 +11,4 @@ def check(ty, val):
 
 def guard(ty):
     "A decorator that wraps a function so it the type passed is enforced via `check`"
-    return check(ty, f)
+    return lambda f: check(ty, f)

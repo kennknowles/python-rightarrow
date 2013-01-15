@@ -161,6 +161,15 @@ class UnionType(Type):
     def __eq__(self, other):
         return isinstance(other, UnionType) and self.types == other.types
 
+    def enforce(self, val):
+        for ty in self.types:
+            try:
+                return ty.enforce(val)
+            except TypeError:
+                continue
+
+        raise TypeError('Type check failed: %s does not have type %s' % (val, self))
+
 class ObjectType(Type):
     def __init__(self, **field_tys):
         self.field_tys = field_tys 

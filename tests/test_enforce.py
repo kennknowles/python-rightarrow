@@ -13,6 +13,10 @@ class TestEnforce(unittest.TestCase):
             ('[str]', []),
             ('[int]', [1, 2, 3]),
             ('[str]', ["foo", "baz", "bar"]),
+
+            ('str|int', 3),
+            ('str|int', "hello"),
+            ('[str]|int', ["hello"]),
         ]
 
         for ty, val in cases:
@@ -24,6 +28,7 @@ class TestEnforce(unittest.TestCase):
             ('[int]', 5),
             ('[int]', ["hello"]),
             ('[str]', [[]]),
+            ('[str]|int', [3]),
         ]
 
         for ty, val in cases:

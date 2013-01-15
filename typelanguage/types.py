@@ -80,7 +80,7 @@ class DictType(Type):
         return '{%s:%s}' % (self.key_ty, self.value_ty)
 
     def __eq__(self, other):
-        return isinstance(other, DictType) and other.key_ty == self,key_ty and other.value_ty == self.value_ty
+        return isinstance(other, DictType) and other.key_ty == self.key_ty and other.value_ty == self.value_ty
 
     def enforce(self, val):
         if type(val) != dict:
@@ -154,6 +154,9 @@ class UnionType(Type):
 
     def __str__(self):
         return '|'.join([str(ty) for ty in self.types])
+
+    def __eq__(self, other):
+        return isinstance(other, UnionType) and self.types == other.types
 
 # Fresh variable supply
 

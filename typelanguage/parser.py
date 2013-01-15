@@ -46,7 +46,8 @@ class TypeParser(object):
     # ===================== PLY Parser specification =====================
     
     precedence = [
-        ('right', 'ARROW')
+        ('right', 'ARROW'),
+        ('left', '|'),
     ]
 
     def p_error(self, t):
@@ -59,6 +60,14 @@ class TypeParser(object):
     def p_ty_parens(self, p):
         "ty : '(' ty ')'"
         p[0] = p[2]
+
+    def p_ty_var(self, p):
+        "ty : TYVAR"
+        p[0] = p[1] # TODO: actually have a constructor for it
+
+    def p_ty_union(self, p):
+        "ty : ty '|' ty"
+        p[0] = UnionType([p[1], p[3]])
 
     def p_ty_bare(self, p):
         "ty : bare_arg_ty"

@@ -42,8 +42,18 @@ class TypeLexer(object):
 
     t_ARROW = r'->'
     t_KWARG = r'\*\*'
-    t_ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
     t_ignore = ' \t'
+
+    def t_ID(self, t):
+        r'~?[a-zA-Z_][a-zA-Z0-9_]*'
+
+        if t.value[0] == '~':
+            t.type = 'TYVAR'
+            t.value = t.value[1:]
+        else:
+            t.type = 'ID'
+
+        return t
 
     def t_newline(self, t):
         r'\n'

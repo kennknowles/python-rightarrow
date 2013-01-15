@@ -20,7 +20,7 @@ This type language provides the following concepts:
 
  * Atomic types, written just like Python's run-time tags: `int`, `long`, `float`, `complex`, `str`, `unicode`
  * Compound types for tuples, lists, dictionaries, written with analogous syntax: `(int, str)`,  `[int]`, `{int: str}`
- * Function types like `int -> int`, `str` (they can get much more complex in Python, though - see below)
+ * Function types like `int -> int`; see below for discussion of Pythonic complexities.
  
 And these are obviously necessary and planned, but the concrete syntax and typing rules are not in place yet:
 

@@ -1,16 +1,15 @@
+from decorator import decorator
 
 from typelanguage.parser import TypeParser
     
 def check(ty, val):
+    "Checks that `val` adheres to type `ty`"
+    
     if isinstance(ty, basestring):
         ty = TypeParser().parse(ty)
 
-    ty.enforce(val)
+    return ty.enforce(val)
 
-def as_type(ty):
+def guard(ty):
     "A decorator that wraps a function so it the type passed is enforced via `check`"
-    
-    def as_type(f, *args, **kwargs):
-        return ty.enforce(f)(*args, **kwargs)
-
-    return decorator(as_type)
+    return check(ty, f)

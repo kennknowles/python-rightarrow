@@ -1,5 +1,7 @@
 from collections import namedtuple, defaultdict
 
+from decorator import decorator
+
 # Kinds
 
 class Kind(object): pass
@@ -119,6 +121,37 @@ class FunctionType(Type):
                             vararg_type = None if self.vararg_type is None else self.vararg_type.substitute(substitution),
                             kwonly_arg_types = None if self.kwonly_arg_types is None else [ty.substitute(substitution) for ty in self.kwonly_arg_types],
                             kwarg_type = None if self.kwarg_type is None else self.kwarg_type.substitute(substitution))
+
+    def enforce(self, f):
+        def wrap_with_checks(f, *all_args, **kwargs):
+            args = all_args[:len(self.arg_types)]
+            varargs = all_args[len(self.arg_types):]
+            # TODO: Get named args right.
+            # Lining up the types and the args is probably the hardest part here.
+            # The decorator library has done similar
+
+            if len(args) < len(self.arg_types):
+                raise TypeError('Not enough arguments (%s, needed at least %s) to %s of type %s; only received %s' % (len(args), len(self.arg_types), f, self, args))
+            else:
+                wrapped_args = [ty.enforce(arg) for ty, arg in zip(self.arg_types, args)]
+
+            if len(varargs) == 0:
+                wrapped_varargs = list(varargs)
+            elif self.vararg_type == None:
+                    raise TypeError('Function %s of type %s was passed varargs %s' % (f, self, varargs))
+            else:
+                wrapped_varargs = self.vararg_type,enforce(varargs) 
+
+            if len(kwargs) == 0:
+                wrapped_kwargs = kwargs
+            elif self.kwarg_type == None:
+                raise TypeError('Function %s of type %s was passed kwargs %s' % (f, self, kwargs))
+            else:
+                wrapped_kwargs = self.kwarg_type.enforce(kwargs)
+
+            return self.return_type.enforce(f(*(wrapped_args + wrapped_varargs), **wrapped_kwargs))
+            
+        return decorator(wrap_with_checks)(f)
 
     def __str__(self):
         comma_separated_bits = [unicode(v) for v in self.arg_types]

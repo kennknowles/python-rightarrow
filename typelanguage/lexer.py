@@ -38,7 +38,9 @@ class TypeLexer(object):
 
     literals = ['|', '(', ')', '{', '}', '[', ']', ':', '*', ',', ';']
     
-    tokens = ['ID', 'TYVAR', 'ARROW', 'KWARG']
+    reserved_words = { 'object': 'OBJECT' }
+
+    tokens = ['ID', 'TYVAR', 'ARROW', 'KWARG'] + reserved_words.values()
 
     t_ARROW = r'->'
     t_KWARG = r'\*\*'
@@ -50,6 +52,8 @@ class TypeLexer(object):
         if t.value[0] == '~':
             t.type = 'TYVAR'
             t.value = t.value[1:]
+        elif t.value in self.reserved_words:
+            t.type = self.reserved_words[t.value]
         else:
             t.type = 'ID'
 

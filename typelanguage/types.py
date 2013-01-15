@@ -161,6 +161,16 @@ class UnionType(Type):
     def __eq__(self, other):
         return isinstance(other, UnionType) and self.types == other.types
 
+class ObjectType(Type):
+    def __init__(self, **field_tys):
+        self.field_tys = field_tys 
+
+    def __str__(self):
+        return 'object(%s)' % ','.join(['%s:%s' % (name, ty) for name, ty in self.field_tys.items()])
+
+    def __eq__(self, other):
+        return isinstance(other, ObjectType) and self.field_tys == other.field_tys
+
 # Fresh variable supply
 
 used_vars = defaultdict(lambda: 0)

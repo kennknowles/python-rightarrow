@@ -41,6 +41,9 @@ class TestParser(unittest.TestCase):
             ('~foo', TypeVariable('foo')),
 
             ('~a -> ~a', FunctionType([TypeVariable('a')], TypeVariable('a'))),
+
+            ('object()', ObjectType()),
+            ('object(foo:int)', ObjectType(foo=AtomicType('int')))
         ]
 
         for string, parsed in test_cases:

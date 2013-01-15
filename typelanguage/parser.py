@@ -137,6 +137,7 @@ class TypeParser(object):
         bare_arg_ty : identifier_ty
                     | dict_ty
                     | list_ty
+                    | object_ty
         """
         p[0] = p[1]
 
@@ -151,6 +152,25 @@ class TypeParser(object):
     def p_dict_ty(self, p):
         "dict_ty : '{' ty ':' ty '}'"
         p[0] = DictType(key_ty=p[2], value_ty=p[4])
+
+    def p_object_ty(self, p):
+        """
+        object_ty : OBJECT '(' ')'
+                  | OBJECT '(' obj_fields ')'
+        """
+        p[0] = ObjectType(**({} if len(p) == 4 else p[3]))
+
+    def p_obj_fields(self, p):
+        """
+        obj_fields : obj_fields ',' obj_field
+                   | obj_field
+        """
+        p[0] = dict([p[1]] if len(p) == 2 else p[1] + [p[3]]) # Note: no checking for dupe fields at the moment
+
+    def p_obj_field(self, p):
+        "obj_field : ID ':' ty"
+        p[0] = (p[1], p[3])
+        
 
 class IteratorToTokenStream(object):
     def __init__(self, iterator):

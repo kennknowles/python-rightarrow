@@ -14,10 +14,10 @@ Here is a more concrete list of implemented and intended features:
  - _yes_      - Definition of a type language.
  - _yes_      - Parsing and printing.
  - _yes_      - Monitoring of type adherence for monomorphic types.
+ - _yes_      - "Any" type for easily saying exactly where things get really dynamic.
  - _upcoming_ - Monitoring of type adherence for polymorphic types.
  - _upcoming_ - Generation of constraints between types in a program.
  - _upcoming_ - Best-effort inference of suitable types.
- - _upcoming_ - `Any` type with gradual typing.
  - _upcoming_ - Refinement types with hybrid type checking.
 
 
@@ -31,6 +31,8 @@ This type language is built from the following concepts:
  - Tuple types: `(int, long)`, `(float, (int, Regex))`, ...
  - Dictionary types: `{string: float}`, `{ (str, str) : [complex] }`, ...
  * Union types `int|long|float`, `str|file`, ...
+ - The "any" type, `??`, for when a value is too complex to describe in this language. May be an indication that
+   a piece of code is metaprogramming or should be treated with gradual typing.
  - Function types:
     - `str -> int`
     - `(int) -> int`
@@ -44,12 +46,10 @@ This type language is built from the following concepts:
     - `~a -> ~a`
     - `[~a] -> [~a]`
     - `( (~a, ~b) ) -> ~a`
- - The "any" type, `??`, when a value is too complex to describe in this language. May be an indication that
-   a piece of code is metaprogramming or should be treated with gradual typing.
-
 
 (TODO: Since tilde is special to pandoc markdown and other markdowns in other ways, choose a better
 way to write polymorphic types that also makes sense in Python)
+
 
 Types as Contracts
 ------------------

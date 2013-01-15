@@ -20,6 +20,7 @@ class TestParser(unittest.TestCase):
             ('complex', complex_t),
             ('str', str_t),
             ('unicode', unicode_t),
+            ('??', any_t),
 
             ('[int]', ListType(elem_ty = int_t)),
             ('[str]', ListType(elem_ty = str_t)),

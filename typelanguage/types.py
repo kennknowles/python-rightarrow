@@ -219,6 +219,20 @@ class ObjectType(Type):
             ty.enforce(getattr(val, field))
         return val
 
+class AnyType(Type):
+    def __str__(self):
+        return '??'
+
+    def __eq__(self, other):
+        return isinstance(other, AnyType)
+
+    def substitute(self, substitution):
+        return self
+
+    def enforce(self, val):
+        return val # In Findler-Wadler this is wrapped with ?? -> ?? but I'm not sure that works for Python
+
+
 # Fresh variable supply
 
 used_vars = defaultdict(lambda: 0)
@@ -240,3 +254,4 @@ unicode_t = NamedType('unicode')
 
 numeric_t = UnionType([int_t, long_t, complex_t, float_t])
 
+any_t = AnyType()

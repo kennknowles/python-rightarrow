@@ -40,10 +40,11 @@ class TypeLexer(object):
     
     reserved_words = { 'object': 'OBJECT' }
 
-    tokens = ['ID', 'TYVAR', 'ARROW', 'KWARG'] + reserved_words.values()
+    tokens = ['ID', 'TYVAR', 'ARROW', 'KWARG', 'ANY'] + reserved_words.values()
 
     t_ARROW = r'->'
     t_KWARG = r'\*\*'
+    t_ANY = r'\?\?'
     t_ignore = ' \t'
 
     def t_ID(self, t):

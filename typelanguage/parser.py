@@ -138,6 +138,7 @@ class TypeParser(object):
                     | dict_ty
                     | list_ty
                     | object_ty
+                    | any_ty
         """
         p[0] = p[1]
 
@@ -152,6 +153,10 @@ class TypeParser(object):
     def p_dict_ty(self, p):
         "dict_ty : '{' ty ':' ty '}'"
         p[0] = DictType(key_ty=p[2], value_ty=p[4])
+
+    def p_any_ty(self, p):
+        "any_ty : ANY"
+        p[0] = AnyType()
 
     def p_object_ty(self, p):
         """

@@ -143,7 +143,7 @@ class TypeParser(object):
 
     def p_identifier_ty(self, p):
         "identifier_ty : ID"
-        p[0] = AtomicType(p[1])
+        p[0] = NamedType(p[1])
 
     def p_list_ty(self, p):
         "list_ty : '[' ty ']'"

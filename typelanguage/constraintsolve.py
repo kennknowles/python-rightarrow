@@ -31,8 +31,8 @@ def reconcile(constraint):
     types that makes this constraint satisfiable, or a Refutation
     '''
     
-    if isinstance(constraint.subtype, AtomicType):
-        if isinstance(constraint.supertype, AtomicType):
+    if isinstance(constraint.subtype, NamedType):
+        if isinstance(constraint.supertype, NamedType):
             if constraint.subtype.name == constraint.supertype.name:
                 return {}
             else:
@@ -42,8 +42,8 @@ def reconcile(constraint):
         else:
             return Refutation('Cannot reconcile atomic type with non-atomic type: %s' % constraint)
 
-    elif isinstance(constraint.supertype, AtomicType):
-        if isinstance(constraint.subtype, AtomicType):
+    elif isinstance(constraint.supertype, NamedType):
+        if isinstance(constraint.subtype, NamedType):
             if constraint.subtype.name == constraint.supertype.name:
                 return {}
             else:

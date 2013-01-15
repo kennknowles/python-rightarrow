@@ -1,7 +1,8 @@
 import unittest
 import ast
 
-from typelanguage import types, constraintgen 
+from typelanguage import constraintgen 
+from typelanguage.types import *
 
 class TestConstraintGen(unittest.TestCase):
 
@@ -12,21 +13,21 @@ class TestConstraintGen(unittest.TestCase):
         return ast.parse(stmt_string).body[0]
 
     def test_atomic_literals(self):
-        assert constraintgen.constraints_expr(self.parse_expr('"hello"')).type == types.AtomicType('str')
-        assert constraintgen.constraints_expr(self.parse_expr('u"hello"')).type == types.AtomicType('str')
-        assert constraintgen.constraints_expr(self.parse_expr('3')).type == types.AtomicType('int')
-        assert constraintgen.constraints_expr(self.parse_expr('3L')).type == types.AtomicType('long')
-        assert constraintgen.constraints_expr(self.parse_expr('-2.5')).type == types.AtomicType('float')
-        assert constraintgen.constraints_expr(self.parse_expr('7.40J')).type == types.AtomicType('complex')
+        assert constraintgen.constraints_expr(self.parse_expr('"hello"')).type == NamedType('str')
+        assert constraintgen.constraints_expr(self.parse_expr('u"hello"')).type == NamedType('str')
+        assert constraintgen.constraints_expr(self.parse_expr('3')).type == NamedType('int')
+        assert constraintgen.constraints_expr(self.parse_expr('3L')).type == NamedType('long')
+        assert constraintgen.constraints_expr(self.parse_expr('-2.5')).type == NamedType('float')
+        assert constraintgen.constraints_expr(self.parse_expr('7.40J')).type == NamedType('complex')
 
     def test_list_literals(self):
         for expr in ['[]', '[3]', '["hello"]', '[[]]' ]:
-            assert isinstance(constraintgen.constraints_expr(self.parse_expr(expr)).type, types.ListType)
+            assert isinstance(constraintgen.constraints_expr(self.parse_expr(expr)).type, ListType)
 
     def test_statements(self):
         cenv = constraintgen.constraints_stmt(self.parse_stmt('x = 3'))
         assert len(cenv.constraints) == 1
-        assert cenv.constraints[0].subtype == types.AtomicType('int')
-        assert isinstance(cenv.constraints[0].supertype, types.TypeVariable)
+        assert cenv.constraints[0].subtype == NamedType('int')
+        assert isinstance(cenv.constraints[0].supertype, TypeVariable)
         assert cenv.return_type == None
         assert cenv.env['x'] == cenv.constraints[0].supertype

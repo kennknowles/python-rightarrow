@@ -137,7 +137,7 @@ def constraints_stmt(stmt, env=None):
             return ConstrainedEnv(env=env, constraints=expr_result.constraints, return_type=expr_result.type)
         else:
             result = types.fresh()
-            return ConstrainedEnv(env=env, constraints=[Constraint(subtype=result, supertype=types.AtomicType('NoneType'))])
+            return ConstrainedEnv(env=env, constraints=[Constraint(subtype=result, supertype=types.NamedType('NoneType'))])
 
     elif isinstance(stmt, ast.Assign):
         if len(stmt.targets) > 1:

@@ -20,7 +20,7 @@ class FunctionKind(Kind):
 
 class Type(object): pass
 
-class AtomicType(Type):
+class NamedType(Type):
     def __init__(self, name):
         self.name = name
 
@@ -31,7 +31,7 @@ class AtomicType(Type):
         return self.name
 
     def __eq__(self, other):
-        return isinstance(other, AtomicType) and other.name == self.name
+        return isinstance(other, NamedType) and other.name == self.name
 
     def enforce(self, val):
         # TODO: Is it worth the boilerplate to have IntType, etc, and all primitives inherit and override here?
@@ -195,16 +195,15 @@ def fresh(prefix=None):
     used_vars[prefix] = used_vars[prefix] + 1
     return TypeVariable(prefix + str(used_vars[prefix]))
 
-# Shortcuts for common types
+# TODO: Give these names a definition that they can be unfolded to.
+bool_t = NamedType('bool')
+int_t = NamedType('int')
+long_t = NamedType('long')
+float_t = NamedType('float')
+complex_t = NamedType('complex')
 
-bool_t = AtomicType('bool')
-int_t = AtomicType('int')
-long_t = AtomicType('long')
-float_t = AtomicType('float')
-complex_t = AtomicType('complex')
-
-str_t = AtomicType('str')
-unicode_t = AtomicType('unicode')
+str_t = NamedType('str')
+unicode_t = NamedType('unicode')
 
 numeric_t = UnionType([int_t, long_t, complex_t, float_t])
 

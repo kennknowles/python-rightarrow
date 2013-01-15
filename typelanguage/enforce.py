@@ -1,6 +1,5 @@
 
 from typelanguage.parser import TypeParser
-from typelanguage.types import *
     
 def check(ty, val):
     if isinstance(ty, basestring):

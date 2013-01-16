@@ -97,41 +97,72 @@ In the spirit of Python and dynamic languages, type inference is best-effort. It
    can just drop them or insert some enforcement code if we like.
 
 
-Further Reading:
-----------------
-
-There's no way to give enough great links for reading about types,
-contracts, hybrid typing, gradual typing, type inference, etc, but
-here are some key starting points that inspire specific parts of
-this project.
-
-(TODO: find hrefs)
-
- - The seminal work on dynamically-checked conttracts is Findler & Felleisen 2002. The
-   core ideas of _blame_ and wrapping functions were here.
- - Flanagan combined that notion with types in Hybrid Type Checking 2006 (later expanded and corrected into Knowles-Flanagan 2010)
- - The term _gradual typing_ was created by Siek and Taha to describe a particular type
-   of Hybrid Type Checking focused on the "Any" type.
- - Knowles-Flanagan 2007 showed that type inference is decidable even if type checking isn't,
-   and it is that method of type reconstruction that inspires the constraint generation and 
-   solving here.
+More to explore
+---------------
 
 There are many other projects that check contracts or types for Python in some way or
-another, but they all focus on checking, not communicating. As such, they miss what
-I like best about types.
+another, but none makes communication their primary goal, with the possible exception 
+of pySonar. As such, they make different design choices. Some are research projects
+or prototypes -- this is not. This is a library meant for use. 
 
- * RPython / PyPy
- * pySonar
- * typechecker
- * contracts
- * pyDBC
+ * [PEP 316](http://www.python.org/dev/peps/pep-0316/) (deferred)
+ * [RPython](http://doc.pypy.org/en/latest/translation.html) and [PyPy](http://pypy.org/) (compilation-oriented)
+ * [pySonar](http://yinwang0.wordpress.com/2010/09/12/pysonar/) and [mini-pysonar](https://github.com/yinwang0/mini-pysonar)
+   (way cool)
+ * [Pyntch](http://www.unixuser.org/~euske/python/pyntch/index.html)
+ * [typechecker](https://github.com/shomah4a/typechecker)
+ * [pycontract](http://www.wayforward.net/pycontract/)
+ * [python-dbc](http://code.google.com/p/python-dbc/) 
+   and [pyDBC](http://www.nongnu.org/pydbc/) 
+   are another cool-looking approach to typing Python.
+   and another [pydbc](https://github.com/cadrian/pydbc) and another [pyDBC](https://github.com/Ceasar/pyDbC)
+ * [python-type-inference](http://code.google.com/p/python-type-inference/wiki/Resources) (no code, but has a great list of papers and even more tools)
 
 And since dynamic languages are much of a muchness, it is worthwhile seeing what is
-happening elsewhere:
+happening elsewhere, though again very few projects emphasize the types themselves as
+fun, interesting and useful, only that the code has them.
 
- * contracts.coffee
- * Racket
- * ...
+ * [Contracts in Racket](http://docs.racket-lang.org/guide/contracts.html) and [Typed Racket](http://docs.racket-lang.org/ts-guide/)
+ * [Typescript](http://www.typescriptlang.org/) 
+   aka [a slightly gradually-typed Javascript](http://siek.blogspot.com/2012/10/is-typescript-gradually-typed-part-1.html)
+   and [Javascript++](http://jspp.javascript.am/) (sort of gradually-typed Javascript)
+   and [javascript-contracts](https://github.com/brownplt/javascript-contracts)
+   and [cerny](http://www.cerny-online.com/cerny.js/)
+ * [Este](https://github.com/Steida/este) (statically-typed coffeescript) 
+   and [Uberscript](https://github.com/jstrachan/coffee-script/blob/master/TypeAnnotations.md) (gradually-typed coffeescript)
+   and [contracts.coffee](http://disnetdev.com/contracts.coffee/)
+ * [Contracts.ruby](https://github.com/egonSchiele/contracts.ruby)
+
+I'm omitting the billion typed languages that compile to Javascript because those are just typed languages compiler to the assembly
+language of the web.
+
+Finally, if you want to actually grok types, then contracts, then types and contracts
+together, then types and dynamic types together, then _polymorphic_ type as contracts
+and dynamic types together, then type inference for such systems,
+try this chronological series of reading.
+
+ - [_Types and Programming Languages_](http://www.cis.upenn.edu/~bcpierce/tapl/) by Benjamin Pierce.
+ - [Contracts for higher-order functions](http://www.eecs.northwestern.edu/~robby/pubs/papers/ho-contracts-icfp2002.pdf)
+   by Robert Bruce Findler & Matthias Felleisen. ICFP 2002.
+ - [Hybrid type checking](http://users.soe.ucsc.edu/~cormac/papers/toplas09.pdf)
+   by Kenneth Knowles & Cormac Flanagan. TOPLAS 2010. (expanded and corrected from POPL 2006)
+ - [Gradual typing for functional languages](http://ecee.colorado.edu/~siek/pubs/pubs/2006/siek06_gradual.pdf)
+   by Jeremy Siek & Walid Taha. Scheme workshop 2006.
+ - [Gradual Typing for Objects](http://ecee.colorado.edu/~siek/gradual-obj.pdf)
+   by Jeremy Siek and Walid Taha. ECOOP 2007.
+ - [Type reconstruction for general refinement types](http://users.soe.ucsc.edu/~cormac/papers/esop07.pdf)
+   by Kenneth Knowles & Cormac Flanagan. ESOP 2007.
+ - [Relationally-parametric polymorphic contracts](http://cs.brown.edu/~sk/Publications/Papers/Published/gmfk-rel-par-poly-cont/paper.pdf)
+   by Arjun Guha, Jacob Matthews, Robert Bruce Findler, and Shriram Krishnamurthi. DLS 2007.
+ - [Gradual typing with unification based inference](http://ecee.colorado.edu/~siek/dls08igtlc.pdf)
+   by Jeremy Siek and Manish Vachharajani. DLS 2008.
+ - [Blame for all](http://homepages.inf.ed.ac.uk/wadler/papers/blame-for-all/blame-for-all.pdf)
+   by Amal Ahmed, Robert Bruce Findler, Jacob Matthews, and Philip Wadler. STOP 2009.
+ - [Always available static and dynamic feedback](http://homes.cs.washington.edu/~mernst/pubs/ductile-icse2011.pdf)
+   by Michael Bayne, Richard Cook, and Michael D. Ernst. ICSE 2011.
+ - [The ins and outs of of gradual type inference](http://www.cs.umd.edu/~avik/papers/iogti.pdf)
+   by Aseem Rastogi, Avik Chaudhuri, and Basil Hosmer. POPL 2012.
+
 
 
 Contributors

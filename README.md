@@ -42,13 +42,10 @@ This type language is built from the following concepts:
     - `(int, *[str]) -> [(str, int)]`
     - `(int, *[int], **{int: str}) -> str`
  - Object types: `object(self_type, field1: int, field2: str, ...)`
- - Polymorphic types (where `~a`, `~b`, ~c` range over any other type)
+ - Polymorphic types (where `~a`, `~b`, `~c` range over any other type)
     - `~a -> ~a`
     - `[~a] -> [~a]`
     - `( (~a, ~b) ) -> ~a`
-
-(TODO: Since tilde is special to pandoc markdown and other markdowns in other ways, choose a better
-way to write polymorphic types that also makes sense in Python)
 
 
 Types as Contracts

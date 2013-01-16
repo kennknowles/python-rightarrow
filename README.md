@@ -113,9 +113,9 @@ or prototypes -- this is not. This is a library meant for use.
  * [typechecker](https://github.com/shomah4a/typechecker)
  * [pycontract](http://www.wayforward.net/pycontract/)
  * [python-dbc](http://code.google.com/p/python-dbc/) 
-   and [pyDBC](http://www.nongnu.org/pydbc/) 
-   are another cool-looking approach to typing Python.
-   and another [pydbc](https://github.com/cadrian/pydbc) and another [pyDBC](https://github.com/Ceasar/pyDbC)
+   and [one pyDBC](http://www.nongnu.org/pydbc/) 
+   and [another pydbc](https://github.com/cadrian/pydbc) 
+   and [yet another pyDBC](https://github.com/Ceasar/pyDbC)
  * [python-type-inference](http://code.google.com/p/python-type-inference/wiki/Resources) (no code, but has a great list of papers and even more tools)
 
 And since dynamic languages are much of a muchness, it is worthwhile seeing what is

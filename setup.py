@@ -8,10 +8,11 @@ if not os.path.exists('README.txt'):
 
 setuptools.setup(
     name='typelanguage',
-    version='0.1',
+    version='0.3',
     description='A type language for Python, including parsing, pretty-printing, type inference, type checking, and run-time contract enforcement.',
     author='Kenneth Knowles',
     author_email='kenn.knowles@gmail.com',
+    url='https://github.com/kennknowles/python-typelanguage',
     license='Apache 2.0',
     long_description=open('README.txt').read(),
     packages = ['typelanguage'],

@@ -34,7 +34,7 @@ class TestEnforce(unittest.TestCase):
         for ty, val in cases:
             check(ty, val)
 
-    def test_check_immediatee_failing(self):
+    def test_check_immediate_failing(self):
         cases = [
             ('int', "hello"),
             ('[int]', 5),

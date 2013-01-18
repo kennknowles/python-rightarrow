@@ -1,3 +1,4 @@
+import copy
 from collections import namedtuple, defaultdict
 
 from decorator import decorator
@@ -204,20 +205,27 @@ class UnionType(Type):
         raise TypeError('Type check failed: %s does not have type %s' % (val, self))
 
 class ObjectType(Type):
-    def __init__(self, **field_tys):
+    def __init__(self, self_ty_name, **field_tys):
+        self.self_ty_name = self_ty_name
         self.field_tys = field_tys 
 
     def __str__(self):
-        return 'object(%s)' % ','.join(['%s:%s' % (name, ty) for name, ty in self.field_tys.items()])
+        return 'object(%s)' % ','.join([self.self_ty_name] + ['%s:%s' % (name, ty) for name, ty in self.field_tys.items()])
 
     def __eq__(self, other):
-        return isinstance(other, ObjectType) and self.field_tys == other.field_tys
+        return isinstance(other, ObjectType) and self.self_ty_name == other.self_ty_name and self.field_tys == other.field_tys
 
     def enforce(self, val):
+        # TODO: bind the self type
+        
+        # We must have a copy with the same class, or it will break code relying on isinstance. Whether this is a "problem"
+        # is debatable, but given the usual encoding of coproducts as distinct subclasses, we'd better respect it.
+        newval = copy.copy(val)
+        
         # Technically lets other properties slip in, but due to every object having a bunch of __foo__ props that can wait
         for field, ty in self.field_tys.items():
-            ty.enforce(getattr(val, field))
-        return val
+            setattr(newval, field, ty.enforce(getattr(val, field)))
+        return newval
 
 class AnyType(Type):
     def __str__(self):

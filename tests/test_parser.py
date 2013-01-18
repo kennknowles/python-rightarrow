@@ -43,8 +43,8 @@ class TestParser(unittest.TestCase):
 
             ('~a -> ~a', FunctionType([TypeVariable('a')], TypeVariable('a'))),
 
-            ('object()', ObjectType()),
-            ('object(foo:int)', ObjectType(foo=NamedType('int')))
+            ('object(self)', ObjectType('self')),
+            ('object(self, foo:int)', ObjectType('self', foo=NamedType('int')))
         ]
 
         for string, parsed in test_cases:

@@ -22,13 +22,13 @@ class TestEnforce(unittest.TestCase):
             ('str|int', "hello"),
             ('[str]|int', ["hello"]),
 
-            ('object()', Struct()),
-            ('object()', 3),
-            ('object()', [5]),
-            ('object()', "hello"),
+            ('object(self)', Struct()),
+            ('object(self)', 3),
+            ('object(self)', [5]),
+            ('object(self)', "hello"),
 
-            ('object(foo:int)', Struct(foo=3)),
-            ('object(foo:[int|str])', Struct(foo=["hello", 3])),
+            ('object(self, foo:int)', Struct(foo=3)),
+            ('object(self, foo:[int|str])', Struct(foo=["hello", 3])),
         ]
 
         for ty, val in cases:
@@ -41,7 +41,7 @@ class TestEnforce(unittest.TestCase):
             ('[int]', ["hello"]),
             ('[str]', [[]]),
             ('[str]|int', [3]),
-            ('object(foo:[int|complex])', Struct(foo=["hello", 3])),
+            ('object(self, foo:[int|complex])', Struct(foo=["hello", 3])),
         ]
 
         for ty, val in cases:

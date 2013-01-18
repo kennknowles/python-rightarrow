@@ -160,10 +160,11 @@ class TypeParser(object):
 
     def p_object_ty(self, p):
         """
-        object_ty : OBJECT '(' ')'
-                  | OBJECT '(' obj_fields ')'
+        object_ty : OBJECT '(' ID ')'
+                  | OBJECT '(' ID ',' obj_fields ')'
         """
-        p[0] = ObjectType(**({} if len(p) == 4 else p[3]))
+        field_types = {} if len(p) == 5 else p[5]
+        p[0] = ObjectType(p[3], **field_types)
 
     def p_obj_fields(self, p):
         """

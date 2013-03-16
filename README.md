@@ -16,24 +16,26 @@ https://github.com/kennknowles/python-rightarrow
 [![Build status](https://travis-ci.org/kennknowles/python-rightarrow.png)](https://travis-ci.org/kennknowles/python-rightarrow)
 
 This library provides a language for concise higher-order annotations for Python programs, inspired
-by the syntax for higher-order contracts and types in advanced languages. Functionality
-akin to contract checking, type checking, and type inference is a work-in-progress.
+by the syntax for higher-order contracts and types in advanced languages. Additional functionality
+provided (to varying degrees of completeness) include run-time checking, static checking, and
+documentation generation.
 
 This project has a "duck-typed" status: Whatever you can use it for, it is ready for :-)
 
 Here is a more concrete list of implemented and intended features:
 
- - _yes_      - Definition of a the language.
+ - _yes_      - Definition of the language.
  - _yes_      - Parsing and printing.
  - _yes_      - Run-time monitoring of adherence for monomorphic annotations.
  - _upcoming_ - Monitoring of adherence for polymorphic annotations.
+ - _upcoming_ - Documentation generation.
  - _upcoming_ - Generation of constraints between annotations in a program.
  - _upcoming_ - Best-effort inference of suitable annotations.
  - _upcoming_ - More precise annotations to support full higher-order design-by-contract.
 
 
 The Annotations
----------
+---------------
 
 This language is built from the following concepts:
 
@@ -61,7 +63,7 @@ This language is built from the following concepts:
 Run-time checking
 -----------------
 
-The module `typelanguage.enforce` contains functions for using these annotations as run-time monitors.
+The module `rightarrow.enforce` contains functions for using these annotations as run-time monitors.
 
 Applied directly:
 
@@ -136,35 +138,15 @@ And there are cool things happening in other dynamic languages!
    and [contracts.coffee](http://disnetdev.com/contracts.coffee/)
  * [Contracts.ruby](https://github.com/egonSchiele/contracts.ruby)
 
-And this library draw inspiration from such a huge amount of academic work it cannot possibly all
-be mentioned, but special thanks to these research efforts
+And this library draws inspiration from such a huge amount of academic work it cannot possibly all
+be mentioned, but special thanks to these research efforts, which you might enjoy.
 
- - Higher-order contracts (too numerous to mention them all!):
-   - [Contracts for higher-order functions](http://www.eecs.northwestern.edu/~robby/pubs/papers/ho-contracts-icfp2002.pdf)
-     by Robert Bruce Findler & Matthias Felleisen.
-   - [Relationally-parametric polymorphic contracts](http://cs.brown.edu/~sk/Publications/Papers/Published/gmfk-rel-par-poly-cont/paper.pdf)
-     by Arjun Guha, Jacob Matthews, Robert Bruce Findler, and Shriram Krishnamurthi. DLS 2007.
-
- - Gradual typing:
-   - [Gradual typing for functional languages](http://ecee.colorado.edu/~siek/pubs/pubs/2006/siek06_gradual.pdf)
-     by Jeremy Siek & Walid Taha. 2006
-   - [Gradual Typing for Objects](http://ecee.colorado.edu/~siek/gradual-obj.pdf)
-     by Jeremy Siek and Walid Taha. ECOOP 2007.
-   - [Gradual typing with unification based inference](http://ecee.colorado.edu/~siek/dls08igtlc.pdf)
-     by Jeremy Siek and Manish Vachharajani. DLS 2008.
-   - [Blame for all](http://homepages.inf.ed.ac.uk/wadler/papers/blame-for-all/blame-for-all.pdf)
-     by Amal Ahmed, Robert Bruce Findler, Jacob Matthews, and Philip Wadler. STOP 2009.
-   - [The ins and outs of of gradual type inference](http://www.cs.umd.edu/~avik/papers/iogti.pdf)
-     by Aseem Rastogi, Avik Chaudhuri, and Basil Hosmer. POPL 2012.
-   - [Always available static and dynamic feedback](http://homes.cs.washington.edu/~mernst/pubs/ductile-icse2011.pdf)
-     by Michael Bayne, Richard Cook, and Michael D. Ernst. ICSE 2011.
-
- - Hybrid Type Checking (full disclosure; I did some of this work): 
-   - [Hybrid type checking](http://users.soe.ucsc.edu/~cormac/papers/toplas09.pdf)
+ - _Higher-order contracts_. Start with [Contracts for higher-order functions](http://www.eecs.northwestern.edu/~robby/pubs/papers/ho-contracts-icfp2002.pdf)
+     by Robert Bruce Findler & Matthias Felleisen, 2002.
+ - _Gradual typing_. Start with [Gradual typing for functional languages](http://ecee.colorado.edu/~siek/pubs/pubs/2006/siek06_gradual.pdf)
+     by Jeremy Siek & Walid Taha, 2006.
+ - _Hybrid Type Checking_. Start with [Hybrid type checking](http://users.soe.ucsc.edu/~cormac/papers/toplas09.pdf)
      by Kenneth Knowles & Cormac Flanagan 2006/2010; 
-   - [Type reconstruction for general refinement types](http://users.soe.ucsc.edu/~cormac/papers/esop07.pdf)
-     by Kenneth Knowles & Cormac Flanagan, 2007.
-
 
 Contributors
 ------------

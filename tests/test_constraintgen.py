@@ -1,8 +1,8 @@
 import unittest
 import ast
 
-from typelanguage import constraintgen 
-from typelanguage.types import *
+from rightarrow import constraintgen 
+from rightarrow.annotations import *
 
 class TestConstraintGen(unittest.TestCase):
 
@@ -22,12 +22,12 @@ class TestConstraintGen(unittest.TestCase):
 
     def test_list_literals(self):
         for expr in ['[]', '[3]', '["hello"]', '[[]]' ]:
-            assert isinstance(constraintgen.constraints_expr(self.parse_expr(expr)).type, ListType)
+            assert isinstance(constraintgen.constraints_expr(self.parse_expr(expr)).type, List)
 
     def test_statements(self):
         cenv = constraintgen.constraints_stmt(self.parse_stmt('x = 3'))
         assert len(cenv.constraints) == 1
         assert cenv.constraints[0].subtype == NamedType('int')
-        assert isinstance(cenv.constraints[0].supertype, TypeVariable)
+        assert isinstance(cenv.constraints[0].supertype, Variable)
         assert cenv.return_type == None
         assert cenv.env['x'] == cenv.constraints[0].supertype

@@ -3,7 +3,7 @@ import sys
 import copy
 from collections import namedtuple
 
-from typelanguage import types
+from rightarrow.annotations import *
 
 class Constraint(object):
     "A type constraint of the form `S <: T`"
@@ -81,15 +81,15 @@ def fn_env(arguments):
 
     for arg in arguments.args:
         if isinstance(arg, ast.Name) and isinstance(arg.ctx, ast.Param):
-            new_env[arg.id] = types.fresh() # TODO: ??
+            new_env[arg.id] = fresh() # TODO: ??
         else:
             raise Exception('Arg is not a name in Param context!? %s' % arg) 
 
     if arguments.vararg:
-        new_env[arguments.vararg] = types.fresh() # TODO: sub/superty of list
+        new_env[arguments.vararg] = fresh() # TODO: sub/superty of list
 
     if arguments.kwarg:
-        new_env[arguments.kwarg] = types.fresh() # TODO: sub/superty of dict
+        new_env[arguments.kwarg] = fresh() # TODO: sub/superty of dict
     
     return new_env
 
@@ -99,7 +99,7 @@ def union(left, right):
     elif right is None:
         return left
     else:
-        return types.UnionType([right, left])
+        return Union([right, left])
 
 def constraints_stmt(stmt, env=None):
     """
@@ -122,8 +122,8 @@ def constraints_stmt(stmt, env=None):
             constraints += cs.constraints
             return_type = union(return_type, cs.return_type)
 
-        env[stmt.name] = types.FunctionType(arg_types=[arg_env[arg.id] for arg in stmt.args.args],
-                                            return_type=return_type)
+        env[stmt.name] = Function(arg_types=[arg_env[arg.id] for arg in stmt.args.args],
+                                  return_type=return_type)
 
         return ConstrainedEnv(env=env, constraints=constraints)
 
@@ -136,8 +136,8 @@ def constraints_stmt(stmt, env=None):
             expr_result = constraints_expr(stmt.value, env=env)
             return ConstrainedEnv(env=env, constraints=expr_result.constraints, return_type=expr_result.type)
         else:
-            result = types.fresh()
-            return ConstrainedEnv(env=env, constraints=[Constraint(subtype=result, supertype=types.NamedType('NoneType'))])
+            result = fresh()
+            return ConstrainedEnv(env=env, constraints=[Constraint(subtype=result, supertype=NamedType('NoneType'))])
 
     elif isinstance(stmt, ast.Assign):
         if len(stmt.targets) > 1:
@@ -149,7 +149,7 @@ def constraints_stmt(stmt, env=None):
         # For an assignment, we actually generate a fresh variable so that it can be the union of all things assigned
         # to it. We do not do any typestate funkiness.
         if target not in env:
-            env[target] = types.fresh()
+            env[target] = fresh()
             
         return ConstrainedEnv(env=env, 
                               constraints = expr_result.constraints + [Constraint(subtype=expr_result.type, 
@@ -163,7 +163,7 @@ def constraints_expr(expr, env=None):
     
     if isinstance(expr, ast.Name) and isinstance(expr.ctx, ast.Load):
         if expr.id in ['False', 'True']: # Unlike other literals, these are actually just global identifiers
-            return ConstrainedType(type=types.bool_t)
+            return ConstrainedType(type=bool_t)
         elif expr.id in env:
             return ConstrainedType(type=env[expr.id])
         else:
@@ -172,31 +172,31 @@ def constraints_expr(expr, env=None):
     elif isinstance(expr, ast.Num):
         # The python ast module already chose the type of the num
         if isinstance(expr.n, int):
-            return ConstrainedType(type=types.int_t)
+            return ConstrainedType(type=int_t)
         elif isinstance(expr.n, long):
-            return ConstrainedType(type=types.long_t)
+            return ConstrainedType(type=long_t)
         elif isinstance(expr.n, float):
-            return ConstrainedType(type=types.float_t)
+            return ConstrainedType(type=float_t)
         elif isinstance(expr.n, complex):
-            return ConstrainedType(type=types.complex_t)
+            return ConstrainedType(type=complex_t)
 
     elif isinstance(expr, ast.Str):
-        return ConstrainedType(type=types.str_t)
+        return ConstrainedType(type=str_t)
 
     elif isinstance(expr, ast.List):
-        return ConstrainedType(type=types.ListType(elem_ty=types.fresh()))
+        return ConstrainedType(type=List(elem_ty=fresh()))
         
     elif isinstance(expr, ast.BinOp):
         left = constraints_expr(expr.left, env=env)
         right = constraints_expr(expr.right, env=env)
-        ty = types.fresh()
+        ty = fresh()
         
         if isinstance(expr.op, ast.Mult):
             # TODO: consider whether all types should match (forces coercions to be explicit; a good thing)
             # Note: though strings and bools can be used in mult, forget it!
-            op_constraints = [Constraint(subtype=left.type, supertype=types.numeric_t),
-                              Constraint(subtype=right.type, supertype=types.numeric_t),
-                              Constraint(subtype=ty, supertype=types.numeric_t)]
+            op_constraints = [Constraint(subtype=left.type, supertype=numeric_t),
+                              Constraint(subtype=right.type, supertype=numeric_t),
+                              Constraint(subtype=ty, supertype=numeric_t)]
         else:
             raise NotImplementedError('BinOp') # TODO: just use function application constraint gen
 

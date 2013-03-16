@@ -4,17 +4,17 @@ import logging
 
 import ply.yacc
 
-from typelanguage.types import *
-from typelanguage.lexer import TypeLexer
+from rightarrow.annotations import *
+from rightarrow.lexer import Lexer
 
 logger = logging.getLogger(__name__)
 
-class TypeParser(object):
-    tokens = TypeLexer.tokens
+class Parser(object):
+    tokens = Lexer.tokens
 
     def __init__(self, debug=False, lexer_class=None):
         self.debug = debug
-        self.lexer_class = lexer_class or TypeLexer # Crufty but works around statefulness in PLY
+        self.lexer_class = lexer_class or Lexer # Crufty but works around statefulness in PLY
 
     def parse(self, string, lexer = None):
         lexer = lexer or self.lexer_class()
@@ -63,11 +63,11 @@ class TypeParser(object):
 
     def p_ty_var(self, p):
         "ty : TYVAR"
-        p[0] = TypeVariable(p[1])
+        p[0] = Variable(p[1])
 
     def p_ty_union(self, p):
         "ty : ty '|' ty"
-        p[0] = UnionType([p[1], p[3]])
+        p[0] = Union([p[1], p[3]])
 
     def p_ty_bare(self, p):
         "ty : bare_arg_ty"
@@ -75,7 +75,7 @@ class TypeParser(object):
 
     def p_ty_funty_bare(self, p):
         "ty : ty ARROW ty"
-        p[0] = FunctionType(arg_types=[p[1]], return_type=p[3])
+        p[0] = Function(arg_types=[p[1]], return_type=p[3])
 
     def p_ty_funty_complex(self, p):
         "ty : '(' maybe_arg_types ')' ARROW ty"
@@ -95,7 +95,7 @@ class TypeParser(object):
             raise Exception('Argument list with multiple kwarg types: %s' % argument_types)
 
         # All the arguments that are not special
-        p[0] = FunctionType(arg_types=arg_types,
+        p[0] = Function(arg_types=arg_types,
                             vararg_type=vararg_types[0] if len(vararg_types) > 0 else None,
                             kwarg_type=kwarg_types[0] if len(kwarg_types) > 0 else None,
                             kwonly_arg_types=None,
@@ -148,15 +148,15 @@ class TypeParser(object):
 
     def p_list_ty(self, p):
         "list_ty : '[' ty ']'"
-        p[0] = ListType(elem_ty=p[2])
+        p[0] = List(elem_ty=p[2])
 
     def p_dict_ty(self, p):
         "dict_ty : '{' ty ':' ty '}'"
-        p[0] = DictType(key_ty=p[2], value_ty=p[4])
+        p[0] = Dict(key_ty=p[2], value_ty=p[4])
 
     def p_any_ty(self, p):
         "any_ty : ANY"
-        p[0] = AnyType()
+        p[0] = Any()
 
     def p_object_ty(self, p):
         """
@@ -164,7 +164,7 @@ class TypeParser(object):
                   | OBJECT '(' ID ',' obj_fields ')'
         """
         field_types = {} if len(p) == 5 else p[5]
-        p[0] = ObjectType(p[3], **field_types)
+        p[0] = Object(p[3], **field_types)
 
     def p_obj_fields(self, p):
         """
@@ -191,5 +191,5 @@ class IteratorToTokenStream(object):
 
 if __name__ == '__main__':
     logging.basicConfig()
-    parser = TypeParser(debug=True)
+    parser = Parser(debug=True)
     print parser.parse(sys.stdin.read())

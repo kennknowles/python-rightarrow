@@ -1,11 +1,11 @@
 
-from typelanguage.parser import TypeParser
+from rightarrow.parser import Parser
     
 def check(ty, val):
     "Checks that `val` adheres to type `ty`"
     
     if isinstance(ty, basestring):
-        ty = TypeParser().parse(ty)
+        ty = Parser().parse(ty)
 
     return ty.enforce(val)
 

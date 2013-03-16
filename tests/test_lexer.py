@@ -3,8 +3,8 @@ import logging
 
 from ply.lex import LexToken
 
-from typelanguage.lexer import TypeLexer
-from typelanguage.types import *
+from rightarrow.lexer import Lexer
+from rightarrow.annotations import *
 
 class TestLexer(unittest.TestCase):
 
@@ -18,7 +18,7 @@ class TestLexer(unittest.TestCase):
     
     def assert_lex_equiv(self, s, stream2):
         # NOTE: lexer fails to reset after call?
-        l = TypeLexer(debug=True)
+        l = Lexer(debug=True)
         stream1 = list(l.tokenize(s)) # Save the stream for debug output when a test fails
         stream2 = list(stream2)
         assert len(stream1) == len(stream2)

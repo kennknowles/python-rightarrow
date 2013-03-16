@@ -1,8 +1,8 @@
 import unittest
 import ast
 
-from typelanguage.enforce import check
-from typelanguage.types import *
+from rightarrow.enforce import check
+from rightarrow.annotations import *
 
 class Struct:
     def __init__(self, **entries): 

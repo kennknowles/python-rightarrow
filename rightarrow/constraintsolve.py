@@ -3,8 +3,8 @@ import ast
 import logging
 import copy
 
-from typelanguage import constraintgen
-from typelanguage.types import *
+from rightarrow import constraintgen
+from rightarrow.types import *
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def reconcile(constraint):
                 return {}
             else:
                 return Refutation('Cannot reconcile different atomic types: %s' % constraint)
-        elif isinstance(constraint.supertype, TypeVariable):
+        elif isinstance(constraint.supertype, Variable):
             return {constraint.supertype.name: contraint.subtype}
         else:
             return Refutation('Cannot reconcile atomic type with non-atomic type: %s' % constraint)
@@ -48,12 +48,12 @@ def reconcile(constraint):
                 return {}
             else:
                 return Refutation('Cannot reconcile different atomic types: %s' % constraint)
-        elif isinstance(constraint.subtype, TypeVariable):
+        elif isinstance(constraint.subtype, Variable):
             return {constraint.subtype.name: constraint.supertype}
         else:
             return Refutation('Cannot reconcile non-atomic type with atomic type: %s' % constraint)
 
-    elif isinstance(constraint.supertype, UnionType):
+    elif isinstance(constraint.supertype, Union):
         # Lots of stuff could happen here; unsure if there's research to bring to bear
         if constraint.subtype in constraint.supertype.types:
             return {}

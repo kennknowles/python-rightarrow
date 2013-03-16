@@ -49,18 +49,18 @@ class NamedType(Type):
             return False # TODO: when we actually have nominal (abstract) types, do some check here
 
 # TODO: Make into a higher-kinded type? Maybe that's just a headache?
-class ListType(Type):
+class List(Type):
     def __init__(self, elem_ty):
         self.elem_ty = elem_ty
 
     def substitute(self, substitution):
-        return ListType(self.elem_ty.substitute(substitution))
+        return List(self.elem_ty.substitute(substitution))
 
     def __str__(self):
         return '[%s]' % self.elem_ty
 
     def __eq__(self, other):
-        return isinstance(other, ListType) and other.elem_ty == self.elem_ty
+        return isinstance(other, List) and other.elem_ty == self.elem_ty
 
     def enforce(self, val):
         if type(val) != list:
@@ -69,13 +69,13 @@ class ListType(Type):
             return [self.elem_ty.enforce(x) for x in val] # This could be slooooow
 
 
-class DictType(Type):
+class Dict(Type):
     def __init__(self, key_ty, value_ty):
         self.key_ty = key_ty
         self.value_ty = value_ty
 
     def substitute(self, substitution):
-        return DictType(key_ty=self.key_ty.substitute(substitution),
+        return Dict(key_ty=self.key_ty.substitute(substitution),
                         value_ty=self.value_ty.substitute(substitution))
 
 
@@ -83,7 +83,7 @@ class DictType(Type):
         return '{%s:%s}' % (self.key_ty, self.value_ty)
 
     def __eq__(self, other):
-        return isinstance(other, DictType) and other.key_ty == self.key_ty and other.value_ty == self.value_ty
+        return isinstance(other, Dict) and other.key_ty == self.key_ty and other.value_ty == self.value_ty
 
     def enforce(self, val):
         if type(val) != dict:
@@ -92,7 +92,7 @@ class DictType(Type):
             return dict([(self.key_ty.enforce(key), self.value_ty.enforce(value)) for key, value in val.items()])
             
         
-class TypeVariable(Type):
+class Variable(Type):
     def __init__(self, name):
         self.name = name
 
@@ -106,9 +106,9 @@ class TypeVariable(Type):
         return '?%s' % self.name
 
     def __eq__(self, other):
-        return isinstance(other, TypeVariable) and  other.name == self.name
+        return isinstance(other, Variable) and  other.name == self.name
 
-class FunctionType(Type):
+class Function(Type):
     def __init__(self, arg_types, return_type, vararg_type=None, kwonly_arg_types=None, kwarg_type=None):
         self.arg_types = arg_types
         self.return_type = return_type
@@ -117,7 +117,7 @@ class FunctionType(Type):
         self.kwonly_arg_types = kwonly_arg_types
 
     def substitute(self, substitution):
-        return FunctionType(arg_types = [ty.substitute(substitution) for ty in self.arg_types],
+        return Function(arg_types = [ty.substitute(substitution) for ty in self.arg_types],
                             return_type = self.return_type.substitute(substitution),
                             vararg_type = None if self.vararg_type is None else self.vararg_type.substitute(substitution),
                             kwonly_arg_types = None if self.kwonly_arg_types is None else [ty.substitute(substitution) for ty in self.kwonly_arg_types],
@@ -174,18 +174,18 @@ class FunctionType(Type):
         return '%s -> %s' % (argument_list, self.return_type)
 
     def __eq__(self, other):
-        return isinstance(other, FunctionType) and other.vararg_type == self.vararg_type and other.kwarg_type == self.kwarg_type \
+        return isinstance(other, Function) and other.vararg_type == self.vararg_type and other.kwarg_type == self.kwarg_type \
           and other.arg_types == self.arg_types and other.kwonly_arg_types == self.kwonly_arg_types
 
-class TypeApplication(Type):
+class Application(Type):
     def __init__(self, fn, args):
         self.fn = fn
         self.args = args
 
     def substitute(self, substitution):
-        return TypeApplication(self.fn.substitute(substitution), [ty.substitute(substitution) for ty in self.args])
+        return Application(self.fn.substitute(substitution), [ty.substitute(substitution) for ty in self.args])
 
-class UnionType(Type):
+class Union(Type):
     def __init__(self, types):
         self.types = types
 
@@ -193,7 +193,7 @@ class UnionType(Type):
         return '|'.join([str(ty) for ty in self.types])
 
     def __eq__(self, other):
-        return isinstance(other, UnionType) and self.types == other.types
+        return isinstance(other, Union) and self.types == other.types
 
     def enforce(self, val):
         for ty in self.types:
@@ -204,7 +204,7 @@ class UnionType(Type):
 
         raise TypeError('Type check failed: %s does not have type %s' % (val, self))
 
-class ObjectType(Type):
+class Object(Type):
     def __init__(self, self_ty_name, **field_tys):
         self.self_ty_name = self_ty_name
         self.field_tys = field_tys 
@@ -213,7 +213,7 @@ class ObjectType(Type):
         return 'object(%s)' % ','.join([self.self_ty_name] + ['%s:%s' % (name, ty) for name, ty in self.field_tys.items()])
 
     def __eq__(self, other):
-        return isinstance(other, ObjectType) and self.self_ty_name == other.self_ty_name and self.field_tys == other.field_tys
+        return isinstance(other, Object) and self.self_ty_name == other.self_ty_name and self.field_tys == other.field_tys
 
     def enforce(self, val):
         # TODO: bind the self type
@@ -227,12 +227,12 @@ class ObjectType(Type):
             setattr(newval, field, ty.enforce(getattr(val, field)))
         return newval
 
-class AnyType(Type):
+class Any(Type):
     def __str__(self):
         return '??'
 
     def __eq__(self, other):
-        return isinstance(other, AnyType)
+        return isinstance(other, Any)
 
     def substitute(self, substitution):
         return self
@@ -248,7 +248,7 @@ def fresh(prefix=None):
     global used_vars
     prefix = prefix or 'X'
     used_vars[prefix] = used_vars[prefix] + 1
-    return TypeVariable(prefix + str(used_vars[prefix]))
+    return Variable(prefix + str(used_vars[prefix]))
 
 # TODO: Give these names a definition that they can be unfolded to.
 bool_t = NamedType('bool')
@@ -260,6 +260,6 @@ complex_t = NamedType('complex')
 str_t = NamedType('str')
 unicode_t = NamedType('unicode')
 
-numeric_t = UnionType([int_t, long_t, complex_t, float_t])
+numeric_t = Union([int_t, long_t, complex_t, float_t])
 
-any_t = AnyType()
+any_t = Any()

@@ -5,7 +5,7 @@ import ply.lex
 
 logger = logging.getLogger(__name__)
 
-class TypeLexer(object):
+class Lexer(object):
     '''
     A Lexical analyzer for Python Typelanguage.
     '''
@@ -70,6 +70,6 @@ class TypeLexer(object):
 
 if __name__ == '__main__':
     logging.basicConfig()
-    lexer = TypeLexer(debug=True)
+    lexer = Lexer(debug=True)
     for token in lexer.tokenize(sys.stdin.read()):
         print '%-20s%s' % (token.value, token.type)

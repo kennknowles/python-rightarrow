@@ -16,9 +16,9 @@ https://github.com/kennknowles/python-rightarrow
 [![Build status](https://travis-ci.org/kennknowles/python-rightarrow.png)](https://travis-ci.org/kennknowles/python-rightarrow)
 
 This library provides a language for concise higher-order annotations for Python programs, inspired
-by the syntax for higher-order contracts and types in advanced languages. Additional functionality
-provided (to varying degrees of completeness) include run-time checking, static checking, and
-documentation generation.
+by the syntax for higher-order contracts and types in advanced languages. Functionality such as run-time
+checking, static checking, inference of annotations, and documentation generation all exist here in
+various stages of completeness.
 
 This project has a "duck-typed" status: Whatever you can use it for, it is ready for :-)
 

@@ -1,39 +1,47 @@
-A Type Language for Python
+```
+ _          _       _     _                               
+ \\        (_)     | |   | |                              
+  \\   _ __ _  __ _| |__ | |_ __ _ _ __ _ __ _____      __
+   \\ | '__| |/ _` | '_ \| __/ _` | '__| '__/ _ \ \ /\ / /
+    \\| |  | | (_| | | | | || (_| | |  | | | (_) \ V  V / 
+     \\_|  |_|\__, |_| |_|\__\__,_|_|  |_|  \___/ \_/\_/  
+              __/ |                                      
+             |___/                                       
+```
+
 ==========================
 
-https://github.com/kennknowles/python-typelanguage
+https://github.com/kennknowles/python-rightarrow
 
-This package provides a type language for communicating about Python programs and values. 
-Humans communicating to other humans, humans communicating to the computer, and even the computer
-communicating to humans (via type inference and run-time contract checking).
+This library provides a language for concise higher-order annotations for Python programs, inspired
+by the syntax for higher-order contracts and types in advanced languages. Functionality
+akin to contract checking, type checking, and type inference is a work-in-progress.
 
 This project has a "duck-typed" status: Whatever you can use it for, it is ready for :-)
 
 Here is a more concrete list of implemented and intended features:
 
- - _yes_      - Definition of a type language.
+ - _yes_      - Definition of a the language.
  - _yes_      - Parsing and printing.
- - _yes_      - Monitoring of type adherence for monomorphic types.
- - _yes_      - "Any" type for easily saying exactly where things get really dynamic.
- - _upcoming_ - Monitoring of type adherence for polymorphic types.
- - _upcoming_ - Generation of constraints between types in a program.
- - _upcoming_ - Best-effort inference of suitable types.
- - _upcoming_ - Refinement types with hybrid type checking.
+ - _yes_      - Run-time monitoring of adherence for monomorphic annotations.
+ - _upcoming_ - Monitoring of adherence for polymorphic annotations.
+ - _upcoming_ - Generation of constraints between annotations in a program.
+ - _upcoming_ - Best-effort inference of suitable annotations.
+ - _upcoming_ - More precise annotations to support full higher-order design-by-contract.
 
 
-The Types
+The Annotations
 ---------
 
-This type language is built from the following concepts:
+This language is built from the following concepts:
 
  - Named types: `int`, `long`, `float`, `complex`, `str`, `unicode`, `file`, `YourClassNameHere`, ...
- - List types: `[int]`, `[[long]]`, ...
- - Tuple types: `(int, long)`, `(float, (int, Regex))`, ...
- - Dictionary types: `{string: float}`, `{ (str, str) : [complex] }`, ...
- * Union types `int|long|float`, `str|file`, ...
- - The "any" type, `??`, for when a value is too complex to describe in this language. May be an indication that
-   a piece of code is metaprogramming or should be treated with gradual typing.
- - Function types:
+ - Lists: `[int]`, `[[long]]`, ...
+ - Tuples: `(int, long)`, `(float, (int, Regex))`, ...
+ - Dictionaries: `{string: float}`, `{ (str, str) : [complex] }`, ...
+ - Unions: `int|long|float`, `str|file`, ...
+ - "Anything goes": `??`
+ - Functions, after which this library is named :-)
     - `str -> int`
     - `(int) -> int`
     - `(int, int) -> int`
@@ -41,18 +49,17 @@ This type language is built from the following concepts:
     - `( str|file ) -> SomeClass`
     - `(int, *[str]) -> [(str, int)]`
     - `(int, *[int], **{int: str}) -> str`
- - Object types: `object(self_type, field1: int, field2: str, ...)`
- - Polymorphic types (where `~a`, `~b`, `~c` range over any other type)
+ - Objects: `object(self_type, field1: int, field2: str, ...)`
+ - Polymorphic types (where `~a`, `~b`, `~c` range over any other type. Syntax subject to change; no preference really)
     - `~a -> ~a`
     - `[~a] -> [~a]`
     - `( (~a, ~b) ) -> ~a`
 
 
-Types as Contracts
-------------------
+Run-time checking
+-----------------
 
-The module `typelanguage.enforce` contains functions for using these types as
-run-time monitors.
+The module `typelanguage.enforce` contains functions for using these annotations as run-time monitors.
 
 Applied directly:
 
@@ -60,9 +67,9 @@ Applied directly:
 >>> check('{string: int}', {"hello" : "there"})
 ```
 
-More interestingly, automatically protecting a function from bad input,
-for example, putting better error checking on Python's `unicode`/`str`
-interactions.
+Wrapping a function to protect it from funky input is more interesting.
+For example, putting better error checking on Python's `unicode`/`str`
+interactions (at least in Python 2)
 
 ```python
 >>> '\xa3'.encode('utf-8')
@@ -79,20 +86,17 @@ UnicodeDecodeError: 'ascii' codec can't decode byte 0xa3 in position 0: ordinal 
 TypeError: Type check failed: ? does not have type unicode
 ```
 
-Eventually, the notion of _blame_ may be usefully incorporated, for pointing
-out which piece of code or agent in a distributed setting is responsible
-for the undesirable value.
+If you are familiar with notions of "blame" for higher-order contracts, pull-requests welcome :-)
 
 
-Type Inference
---------------
+Inferring Annotations
+---------------------
 
-In the spirit of Python and dynamic languages, type inference is best-effort. It works like so:
+Inference is a work-in-progress, definitely planned, and almost certainly will always be "best effort" only.
+It works like so:
 
-1. By traversing the code, we can discover a bunch of constraints between types in
-   different bits.
-2. Some of these constraints are going to be very easy to solve, so we can just
-   propagate the results.
+1. By traversing the code, we can discover a bunch of constraints between different missing annotations.
+2. Some of these constraints are going to be very easy to solve, so we can just propagate the results.
 3. Some of these constraints are not going to be practical to try to solve, so we
    can just drop them or insert some enforcement code if we like.
 
@@ -100,10 +104,9 @@ In the spirit of Python and dynamic languages, type inference is best-effort. It
 More to explore
 ---------------
 
-There are many other projects that check contracts or types for Python in some way or
-another, but none makes communication their primary goal, with the possible exception 
-of pySonar. As such, they make different design choices. Some are research projects
-or prototypes -- this is not. This is a library meant for use. 
+There are many other projects that check contracts or types for Python in some way. 
+They are all different, many are prototypes or research projects, and none 
+seem to serve the need that motivates this library. Still, check them out!
 
  * [PEP 316](http://www.python.org/dev/peps/pep-0316/) (deferred)
  * [RPython](http://doc.pypy.org/en/latest/translation.html) and [PyPy](http://pypy.org/) (compilation-oriented)
@@ -118,9 +121,7 @@ or prototypes -- this is not. This is a library meant for use.
    and [yet another pyDBC](https://github.com/Ceasar/pyDbC)
  * [python-type-inference](http://code.google.com/p/python-type-inference/wiki/Resources) (no code, but has a great list of papers and even more tools)
 
-And since dynamic languages are much of a muchness, it is worthwhile seeing what is
-happening elsewhere, though again very few projects emphasize the types themselves as
-fun, interesting and useful, only that the code has them.
+And there are cool things happening in other dynamic languages! 
 
  * [Contracts in Racket](http://docs.racket-lang.org/guide/contracts.html) and [Typed Racket](http://docs.racket-lang.org/ts-guide/)
  * [Typescript](http://www.typescriptlang.org/) 
@@ -133,36 +134,34 @@ fun, interesting and useful, only that the code has them.
    and [contracts.coffee](http://disnetdev.com/contracts.coffee/)
  * [Contracts.ruby](https://github.com/egonSchiele/contracts.ruby)
 
-I'm omitting the billion typed languages that compile to Javascript because those are just typed languages compiler to the assembly
-language of the web.
+And this library draw inspiration from such a huge amount of academic work it cannot possibly all
+be mentioned, but special thanks to these research efforts
 
-Finally, if you want to actually grok types, then contracts, then types and contracts
-together, then types and dynamic types together, then _polymorphic_ type as contracts
-and dynamic types together, then type inference for such systems,
-try this chronological series of reading.
+ - Higher-order contracts (too numerous to mention them all!):
+   - [Contracts for higher-order functions](http://www.eecs.northwestern.edu/~robby/pubs/papers/ho-contracts-icfp2002.pdf)
+     by Robert Bruce Findler & Matthias Felleisen.
+   - [Relationally-parametric polymorphic contracts](http://cs.brown.edu/~sk/Publications/Papers/Published/gmfk-rel-par-poly-cont/paper.pdf)
+     by Arjun Guha, Jacob Matthews, Robert Bruce Findler, and Shriram Krishnamurthi. DLS 2007.
 
- - [_Types and Programming Languages_](http://www.cis.upenn.edu/~bcpierce/tapl/) by Benjamin Pierce.
- - [Contracts for higher-order functions](http://www.eecs.northwestern.edu/~robby/pubs/papers/ho-contracts-icfp2002.pdf)
-   by Robert Bruce Findler & Matthias Felleisen. ICFP 2002.
- - [Hybrid type checking](http://users.soe.ucsc.edu/~cormac/papers/toplas09.pdf)
-   by Kenneth Knowles & Cormac Flanagan. TOPLAS 2010. (expanded and corrected from POPL 2006)
- - [Gradual typing for functional languages](http://ecee.colorado.edu/~siek/pubs/pubs/2006/siek06_gradual.pdf)
-   by Jeremy Siek & Walid Taha. Scheme workshop 2006.
- - [Gradual Typing for Objects](http://ecee.colorado.edu/~siek/gradual-obj.pdf)
-   by Jeremy Siek and Walid Taha. ECOOP 2007.
- - [Type reconstruction for general refinement types](http://users.soe.ucsc.edu/~cormac/papers/esop07.pdf)
-   by Kenneth Knowles & Cormac Flanagan. ESOP 2007.
- - [Relationally-parametric polymorphic contracts](http://cs.brown.edu/~sk/Publications/Papers/Published/gmfk-rel-par-poly-cont/paper.pdf)
-   by Arjun Guha, Jacob Matthews, Robert Bruce Findler, and Shriram Krishnamurthi. DLS 2007.
- - [Gradual typing with unification based inference](http://ecee.colorado.edu/~siek/dls08igtlc.pdf)
-   by Jeremy Siek and Manish Vachharajani. DLS 2008.
- - [Blame for all](http://homepages.inf.ed.ac.uk/wadler/papers/blame-for-all/blame-for-all.pdf)
-   by Amal Ahmed, Robert Bruce Findler, Jacob Matthews, and Philip Wadler. STOP 2009.
- - [Always available static and dynamic feedback](http://homes.cs.washington.edu/~mernst/pubs/ductile-icse2011.pdf)
-   by Michael Bayne, Richard Cook, and Michael D. Ernst. ICSE 2011.
- - [The ins and outs of of gradual type inference](http://www.cs.umd.edu/~avik/papers/iogti.pdf)
-   by Aseem Rastogi, Avik Chaudhuri, and Basil Hosmer. POPL 2012.
+ - Gradual typing:
+   - [Gradual typing for functional languages](http://ecee.colorado.edu/~siek/pubs/pubs/2006/siek06_gradual.pdf)
+     by Jeremy Siek & Walid Taha. 2006
+   - [Gradual Typing for Objects](http://ecee.colorado.edu/~siek/gradual-obj.pdf)
+     by Jeremy Siek and Walid Taha. ECOOP 2007.
+   - [Gradual typing with unification based inference](http://ecee.colorado.edu/~siek/dls08igtlc.pdf)
+     by Jeremy Siek and Manish Vachharajani. DLS 2008.
+   - [Blame for all](http://homepages.inf.ed.ac.uk/wadler/papers/blame-for-all/blame-for-all.pdf)
+     by Amal Ahmed, Robert Bruce Findler, Jacob Matthews, and Philip Wadler. STOP 2009.
+   - [The ins and outs of of gradual type inference](http://www.cs.umd.edu/~avik/papers/iogti.pdf)
+     by Aseem Rastogi, Avik Chaudhuri, and Basil Hosmer. POPL 2012.
+   - [Always available static and dynamic feedback](http://homes.cs.washington.edu/~mernst/pubs/ductile-icse2011.pdf)
+     by Michael Bayne, Richard Cook, and Michael D. Ernst. ICSE 2011.
 
+ - Hybrid Type Checking (full disclosure; I did some of this work): 
+   - [Hybrid type checking](http://users.soe.ucsc.edu/~cormac/papers/toplas09.pdf)
+     by Kenneth Knowles & Cormac Flanagan 2006/2010; 
+   - [Type reconstruction for general refinement types](http://users.soe.ucsc.edu/~cormac/papers/esop07.pdf)
+     by Kenneth Knowles & Cormac Flanagan, 2007.
 
 
 Contributors

@@ -108,6 +108,37 @@ class Variable(Type):
     def __eq__(self, other):
         return isinstance(other, Variable) and  other.name == self.name
 
+    def enforce(self, val):
+        raise BoundVariableException(BoundVariable(self.name, val))
+
+class BoundVariable(Type):
+    def __init__(self, name, val):
+        self.name = name
+        self.val = val
+
+    def substitute(self, substitution):
+        return self
+
+    def __str__(self):
+        return "%s:%s" % (self.name, type(self.val))
+
+    def __eq__(self, other):
+        if isinstance(other, Variable):
+            return self.name == other.name
+        elif isinstance(other, BoundVariable):
+            return self.name == other.name
+        return False
+
+    def enforce(self, val):
+        if type(self.val) == type(val):
+            return val
+        else:
+            raise TypeError('Type check failed: %s is not of type %s' % (val, type(self.val)))
+
+class BoundVariableException(BaseException):
+    def __init__(self, b):
+        self.bvar = b
+
 class Function(Type):
     def __init__(self, arg_types, return_type, vararg_type=None, kwonly_arg_types=None, kwarg_type=None):
         self.arg_types = arg_types
@@ -124,6 +155,29 @@ class Function(Type):
                             kwarg_type = None if self.kwarg_type is None else self.kwarg_type.substitute(substitution))
 
     def enforce(self, f):
+        def attempt_enforce(arg_types, args, vararg_type, varargs, kwarg_type, kwargs):
+            if len(args) < len(arg_types):
+                raise TypeError('Not enough arguments (%s, needed at least %s) to %s of type %s; only received %s' % (len(args), len(arg_types), f, self, args))
+            else:
+                wrapped_args = [ty.enforce(arg) for ty, arg in zip(arg_types, args)]
+
+            if len(varargs) == 0:
+                wrapped_varargs = list(varargs)
+            elif vararg_type == None:
+                    raise TypeError('Function %s of type %s was passed varargs %s' % (f, self, varargs))
+            else:
+                wrapped_varargs = vararg_type,enforce(varargs) 
+
+            if len(kwargs) == 0:
+                wrapped_kwargs = kwargs
+            elif kwarg_type == None:
+                raise TypeError('Function %s of type %s was passed kwargs %s' % (f, self, kwargs))
+            else:
+                wrapped_kwargs = kwarg_type.enforce(kwargs)
+
+            return wrapped_args, wrapped_varargs, wrapped_kwargs
+
+
         def wrap_with_checks(f, *all_args, **kwargs):
             args = all_args[:len(self.arg_types)]
             varargs = all_args[len(self.arg_types):]
@@ -131,26 +185,25 @@ class Function(Type):
             # Lining up the types and the args is probably the hardest part here.
             # The decorator library has done similar
 
-            if len(args) < len(self.arg_types):
-                raise TypeError('Not enough arguments (%s, needed at least %s) to %s of type %s; only received %s' % (len(args), len(self.arg_types), f, self, args))
-            else:
-                wrapped_args = [ty.enforce(arg) for ty, arg in zip(self.arg_types, args)]
+            arg_types = self.arg_types
+            vararg_type = self.vararg_type
+            kwarg_type = self.kwarg_type
+            return_type = self.return_type
+            while True:
+                try:
+                    wrapped_args, wrapped_varargs, wrapped_kwargs \
+                            = attempt_enforce(arg_types, args, vararg_type, varargs, kwarg_type, kwargs)
+                    break
+                except BoundVariableException as be:
+                    b = be.bvar
+                    arg_types = [ty.substitute({b.name: b}) for ty in arg_types]
+                    return_type = return_type.substitute({b.name : b})
+                    if vararg_type != None:
+                        vararg_type.substitute({b.name : b})
+                    if kwarg_type != None:
+                        kwarg_type.substitute({b.name : b})
 
-            if len(varargs) == 0:
-                wrapped_varargs = list(varargs)
-            elif self.vararg_type == None:
-                    raise TypeError('Function %s of type %s was passed varargs %s' % (f, self, varargs))
-            else:
-                wrapped_varargs = self.vararg_type,enforce(varargs) 
-
-            if len(kwargs) == 0:
-                wrapped_kwargs = kwargs
-            elif self.kwarg_type == None:
-                raise TypeError('Function %s of type %s was passed kwargs %s' % (f, self, kwargs))
-            else:
-                wrapped_kwargs = self.kwarg_type.enforce(kwargs)
-
-            return self.return_type.enforce(f(*(wrapped_args + wrapped_varargs), **wrapped_kwargs))
+            return return_type.enforce(f(*(wrapped_args + wrapped_varargs), **wrapped_kwargs))
             
         return decorator(wrap_with_checks)(f)
 

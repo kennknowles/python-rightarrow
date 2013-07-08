@@ -4,7 +4,7 @@ import logging
 import copy
 
 from rightarrow import constraintgen
-from rightarrow.types import *
+from rightarrow.annotations import *
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def reconcile(constraint):
             else:
                 return Refutation('Cannot reconcile different atomic types: %s' % constraint)
         elif isinstance(constraint.supertype, Variable):
-            return {constraint.supertype.name: contraint.subtype}
+            return {constraint.supertype.name: constraint.subtype}
         else:
             return Refutation('Cannot reconcile atomic type with non-atomic type: %s' % constraint)
 

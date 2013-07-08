@@ -166,7 +166,7 @@ class Function(Type):
             elif vararg_type == None:
                     raise TypeError('Function %s of type %s was passed varargs %s' % (f, self, varargs))
             else:
-                wrapped_varargs = vararg_type,enforce(varargs) 
+                wrapped_varargs = vararg_type.enforce(varargs)
 
             if len(kwargs) == 0:
                 wrapped_kwargs = kwargs
